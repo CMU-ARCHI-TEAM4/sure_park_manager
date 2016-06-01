@@ -1,0 +1,119 @@
+package com.lge.avengers;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ * Servlet implementation class HelloWorld
+ */
+@WebServlet("/HelloWorld")
+public class HelloWorld extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public HelloWorld() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		// TODO Auto-generated method stub
+		//response.getWriter().append("Served at: ").append(request.getContextPath());
+		//response.getWriter().append("</br> Hello Avengers");
+
+		response.setContentType("text/html");
+
+		PrintWriter out = response.getWriter();
+
+		out.println("<html>");
+		out.println("<body bgcolor=\"white\">");
+		out.println("<head>");
+
+		out.println("<title> Sure's Park System </title>");
+		out.println("</head>");
+		out.println("<body>");
+
+		out.println("<h1>Welcome to Sure's Park System!</h1>");
+
+
+		out.println("Please click to open entry gate<BR>");
+
+		// a button for entry gate
+		out.println("<P>");
+		out.print("<form action=\"");
+		out.print(response.encodeURL("OpenEntry"));
+		out.print("\" ");
+		out.println("method=POST>");
+		out.println("<input type=hidden name=\"entryGate\" value=\"OpenEntryGate\">");
+		out.println("<br>");
+		out.println("<input type=submit value=\"OpenEntryGate\">");
+		out.println("</form>");
+
+
+		out.println("</body>");
+		out.println("</html>");
+
+		out.close();
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		doGet(request, response);
+	}
+
+	private class Order {
+	    
+	    String kind;
+	    String with;
+	    int quantity;
+
+	    Order(String thekind) {
+		kind = thekind;
+		quantity = 1; // default quantity
+	    }
+
+	    Order(String thekind, String withwhat) {
+		kind = thekind;
+		with = withwhat;
+		quantity = 1; // default quantity
+	    }    
+
+	    String getName() {
+		if (with == null) 
+		    return kind;
+		return kind + " with " + with;
+	    }
+
+	    int getQuantity() {
+		return quantity;
+	    }
+
+	    void setQuantity(int n) {
+		quantity = n;
+	    }
+	}
+}
+
+

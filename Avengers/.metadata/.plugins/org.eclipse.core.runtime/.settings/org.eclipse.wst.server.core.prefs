@@ -1,0 +1,3 @@
+eclipse.preferences.version=1
+module-start-timeout=300000
+runtimes=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\r\n<runtimes>\r\n  <runtime id\="D-_Eclipse_Project_CMU_EE_sure_park_manager_apache-tomcat-7.0.69-windows-x86_apache-tomcat-7.0.69" id-set\="true" location\="D\:/Eclipse_Project_CMU_EE/sure_park_manager/apache-tomcat-7.0.69-windows-x86/apache-tomcat-7.0.69" name\="apache-tomcat-7.0.69" runtime-type-id\="org.eclipse.jst.server.tomcat.runtime.70" timestamp\="0" vm-install-id\="1464802522585" vm-install-type-id\="org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType"/>\r\n</runtimes>\r\n

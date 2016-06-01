@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<servers>
+  <server auto-publish-setting="2" auto-publish-time="1" configuration-id="/Servers/apache-tomcat-7.0.69 at localhost-config" deployDir="wtpwebapps" hostname="localhost" id="apache-tomcat-7.0.69 at localhost" name="apache-tomcat-7.0.69 at localhost" runtime-id="D-_Eclipse_Project_CMU_EE_sure_park_manager_apache-tomcat-7.0.69-windows-x86_apache-tomcat-7.0.69" server-type="org.eclipse.jst.server.tomcat.70" server-type-id="org.eclipse.jst.server.tomcat.70" start-timeout="45" stop-timeout="15" testEnvironment="true" timestamp="1">
+    <list key="modules" value0="Ave::org.eclipse.jst.jee.server:Ave::jst.web::3.0"/>
+  </server>
+  <server auto-publish-setting="2" auto-publish-time="1" configuration-id="/Servers/apache-tomcat-7.0.69 at localhost (2)-config" deployDir="wtpwebapps" hostname="localhost" id="apache-tomcat-7.0.69 at localhost (2)" name="apache-tomcat-7.0.69 at localhost (2)" runtime-id="D-_Eclipse_Project_CMU_EE_sure_park_manager_apache-tomcat-7.0.69-windows-x86_apache-tomcat-7.0.69" server-type="org.eclipse.jst.server.tomcat.70" server-type-id="org.eclipse.jst.server.tomcat.70" start-timeout="45" stop-timeout="15" testEnvironment="true" timestamp="1">
+    <list key="modules" value0="Ave::org.eclipse.jst.jee.server:Ave::jst.web::3.0"/>
+  </server>
+</servers>
