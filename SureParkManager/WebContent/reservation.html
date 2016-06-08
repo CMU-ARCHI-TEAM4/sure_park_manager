@@ -8,33 +8,38 @@
 	</head>
 
 	<body>
-        <form action="login" method="post">
+        <form action="reservation" method="post">
             <table class="centerTable">
                 <tr ><td colspan="2" align="center"><h1>Sure's Park Reservation System</h1></td></tr>
                 <tr>
-                    <td align="center">First name</td>
+                    <td align="center">First Name</td>
                     <td><input type="text" name="first_name" /></td>
                 </tr>
                 <tr>
-                    <td align="center">Last name</td>
+                    <td align="center">Last Name</td>
                     <td><input type="text" name="last_name" /></td>
+                </tr>
+                <tr>
+                    <td align="center">Date for reservation</td>
+                    <td><input type="date" name="date" /></td>
+                </tr>
+                <tr>
+                    <td align="center">Time for reservation</td>
+                    <td><input type="time" name="time" /></td>
                 </tr>
                 <tr>
                     <td align="center">E-mail</td>
                     <td><input type="text" name="email" /></td>
                 </tr>
                 <tr>
-                    <td align="center">Credit card number without '-'</td>
+                    <td align="center">Credit Card Number Without '-'</td>
                     <td><input type="text" name="card_number" /></td>
                 </tr>
                 <tr>
-                    <td align="center">Date</td>
-                    <td><input type="date" name="date" /></td>
+                    <td align="center">Credit Card Validation Date</td>
+                    <td><input type="Date" name="card_date" /></td>
                 </tr>
-                <tr>
-                    <td align="center">Time</td>
-                    <td><input type="time" name="time" /></td>
-                </tr>
+                
                 <tr ><td colspan="2" align="center"><input type="submit" value="Reservation"/></td></tr>
             </table>
 	    </form>
