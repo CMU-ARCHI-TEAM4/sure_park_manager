@@ -2,6 +2,8 @@
 <html>
 
 	<head>
+	    <meta http-equiv="refresh" content="0; url=reservation" />
+	    <!-- redirect to servlet -->
 		<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
 		<title>Sure-Park</title>
 		<link rel="stylesheet" href="style.css" type="text/css">
@@ -13,31 +15,43 @@
                 <tr ><td colspan="2" align="center"><h1>Sure's Park Reservation System</h1></td></tr>
                 <tr>
                     <td align="center">First Name</td>
-                    <td><input type="text" name="first_name" /></td>
+                    <td><input type="text" name="first_name" readonly/></td>
                 </tr>
                 <tr>
                     <td align="center">Last Name</td>
-                    <td><input type="text" name="last_name" /></td>
+                    <td><input type="text" name="last_name" readonly/></td>
                 </tr>
                 <tr>
-                    <td align="center">Date for reservation</td>
+                    <td align="center">Start Date</td>
                     <td><input type="date" name="date" /></td>
                 </tr>
                 <tr>
-                    <td align="center">Time for reservation</td>
+                    <td align="center">Start Time</td>
+                    <td><input type="time" name="time" /></td>
+                </tr>
+                <tr>
+                    <td align="center">End Date</td>
+                    <td><input type="date" name="date" /></td>
+                </tr>
+                <tr>
+                    <td align="center">End Time</td>
                     <td><input type="time" name="time" /></td>
                 </tr>
                 <tr>
                     <td align="center">E-mail</td>
-                    <td><input type="text" name="email" /></td>
+                    <td><input type="text" name="email" readonly/></td>
                 </tr>
                 <tr>
-                    <td align="center">Credit Card Number Without '-'</td>
-                    <td><input type="text" name="card_number" /></td>
+                    <td align="center">Phone Number</td>
+                    <td><input type="text" name="phoneNumber" readonly/></td>
+                </tr>
+                <tr>
+                    <td align="center">Credit Card Number</td>
+                    <td><input type="text" name="card_number" readonly/></td>
                 </tr>
                 <tr>
                     <td align="center">Credit Card Validation Date</td>
-                    <td><input type="Date" name="card_date" /></td>
+                    <td><input type="text" name="card_date" readonly/></td>
                 </tr>
                 
                 <tr ><td colspan="2" align="center"><input type="submit" value="Reservation"/></td></tr>

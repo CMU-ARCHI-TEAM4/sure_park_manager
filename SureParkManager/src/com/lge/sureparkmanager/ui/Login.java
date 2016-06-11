@@ -33,6 +33,8 @@ public class Login extends HttpServlet {
 
 		String id = request.getParameter("id");
 		String pw = request.getParameter("passwd");
+		
+		request.setAttribute("id", "hello");
 
 		DataBaseManager dbm = (DataBaseManager)SystemManager.getInstance().getManager(
 		        SystemManager.DATABASE_MANAGER);
