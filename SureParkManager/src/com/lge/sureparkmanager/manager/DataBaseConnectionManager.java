@@ -10,7 +10,7 @@ import com.lge.sureparkmanager.utils.Log;
 public final class DataBaseConnectionManager {
     private static final String TAG = DataBaseConnectionManager.class.getSimpleName();
 
-    private String mUrl = "jdbc:mysql://localhost/sure_park_system_schema?autoReconnect=true&useSSL=false";
+    private String mUrl = "jdbc:mysql://localhost/sure_park_system?autoReconnect=true&useSSL=true";
     private String mId = "root";
     private String mPassword = "swarchi1234";
 

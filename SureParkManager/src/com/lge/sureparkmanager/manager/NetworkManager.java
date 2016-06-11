@@ -1,11 +1,14 @@
 package com.lge.sureparkmanager.manager;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import com.lge.sureparkmanager.utils.Log;
 
@@ -25,7 +28,6 @@ public final class NetworkManager extends SystemManagerBase {
         Log.d(TAG, "init");
 
         WiFiSocket ws = new WiFiSocket(7777);
-        ws.setName("WiFiSocket-thread");
         ws.start();
     }
 
@@ -39,10 +41,37 @@ public final class NetworkManager extends SystemManagerBase {
 
     }
 
-    public void sendMessageToClients(String msg) {
+    public void sendBroadcast(String msg) {
         for (SocketObject so : mSocketObjects) {
             so.mSender.sendMessageToClient(msg);
         }
+    }
+
+    private void sendMessageToTarget(SocketObject so, String msg) {
+        for (SocketObject s : mSocketObjects) {
+            if (Objects.equals(s, so)) {
+                s.mSender.sendMessageToClient(msg);
+                return;
+            }
+        }
+    }
+
+    private SocketObject getSocketObject(Sender sender) {
+        for (SocketObject so : mSocketObjects) {
+            if (Objects.equals(so.mSender, sender)) {
+                return so;
+            }
+        }
+        return null;
+    }
+
+    private SocketObject getSocketObject(Receiver receiver) {
+        for (SocketObject so : mSocketObjects) {
+            if (Objects.equals(so.mReceiver, receiver)) {
+                return so;
+            }
+        }
+        return null;
     }
 
     private final class WiFiSocket extends Thread {
@@ -62,6 +91,7 @@ public final class NetworkManager extends SystemManagerBase {
 
                 while (!Thread.currentThread().isInterrupted()) {
                     socket = serverSocket.accept();
+                    Log.d(TAG, "accepted client: " + socket);
 
                     Sender sender = new Sender(socket);
                     Receiver receiver = new Receiver(socket);
@@ -75,26 +105,30 @@ public final class NetworkManager extends SystemManagerBase {
     }
 
     private final class Sender implements SocketOperations {
-        private String mName;
         private Socket mSocket;
-        private DataOutputStream mOut;
+        private BufferedWriter mOut;
 
         Sender(Socket socket) {
             mSocket = socket;
             try {
-                mOut = new DataOutputStream(mSocket.getOutputStream());
-                mName = "[" + mSocket.getInetAddress() + ":" + mSocket.getPort() + ":" + "] ";
+                mOut = new BufferedWriter(new OutputStreamWriter(mSocket.getOutputStream()));
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
         public void sendMessageToClient(String msg) {
             if (mOut != null) {
+                final SocketObject so = getSocketObject(this);
                 try {
-                    Log.d(TAG, "sendMessageToClient " + msg);
-                    mOut.writeUTF(mName + msg);
+                    Log.d(TAG, "sendMessageToClient: " + msg);
+                    mOut.write(msg);
+                    mOut.flush();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.d(TAG, "connection terminated...");
+                    if (so != null) {
+                        so.close();
+                    }
                 }
             }
         }
@@ -116,12 +150,12 @@ public final class NetworkManager extends SystemManagerBase {
 
     private final class Receiver extends Thread implements SocketOperations {
         private Socket mSocket;
-        private DataInputStream mIn;
+        private BufferedReader mIn;
 
         Receiver(Socket socket) {
             mSocket = socket;
             try {
-                mIn = new DataInputStream(mSocket.getInputStream());
+                mIn = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -129,11 +163,19 @@ public final class NetworkManager extends SystemManagerBase {
 
         @Override
         public void run() {
-            while (mIn != null) {
-                try {
-                    System.out.println(mIn.readUTF());
-                } catch (IOException e) {
-                    e.printStackTrace();
+            SocketObject so = null;
+            String line = null;
+
+            try {
+                while ((line = mIn.readLine()) != null) {
+                    Log.d(TAG, line);
+                    so = getSocketObject(this);
+                    sendMessageToTarget(so, line);
+                }
+            } catch (IOException e) {
+                Log.d(TAG, "connection terminated...");
+                if (so != null) {
+                    so.close();
                 }
             }
         }
@@ -153,7 +195,7 @@ public final class NetworkManager extends SystemManagerBase {
         }
     }
 
-    private final class SocketObject implements SocketOperations {
+    private final class SocketObject {
         private Sender mSender;
         private Receiver mReceiver;
 
@@ -162,10 +204,10 @@ public final class NetworkManager extends SystemManagerBase {
             mReceiver = receiver;
         }
 
-        @Override
         public void close() {
             mSender.close();
             mReceiver.close();
+            mSocketObjects.remove(this);
         }
     }
 

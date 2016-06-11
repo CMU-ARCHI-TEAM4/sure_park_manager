@@ -80,6 +80,24 @@ input[type=submit] {
     box-shadow: 1px 1px 3px #000;
     margin-right: 0.5em;
 }
+input[type=button] {
+    width: auto;
+    padding: 0.25em 1em;
+    line-height: 1.5em;
+    background: -webkit-gradient(linear, left top, left bottom, from(#a00), to(#600));
+    background: -moz-gradient(linear, left top, left bottom, from(#a00), to(#600));
+    background: -o-gradient(linear, left top, left bottom, from(#a00), to(#600));
+    background: -ms-gradient(linear, left top, left bottom, from(#a00), to(#600));
+    background: gradient(linear, left top, left bottom, from(#a00), to(#600));
+    border: 2px solid #c00;
+    text-shadow: 0 0 2px #300;
+    font-weight: bold;
+    /*box-shadow*/
+    -webkit-box-shadow: 1px 1px 3px #000;
+    -moz-box-shadow: 1px 1px 3px #000;
+    box-shadow: 1px 1px 3px #000;
+    margin-right: 0.5em;
+}
 input[type=reset] {
     width: auto;
     padding: 0.25em 1em;

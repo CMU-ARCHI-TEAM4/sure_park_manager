@@ -76,5 +76,11 @@ public final class DataBaseManager extends SystemManagerBase {
 
             return ret;
         }
+
+        public boolean existConfirmationId(String id) {
+            boolean ret = true;
+
+            return ret;
+        }
     }
 }
