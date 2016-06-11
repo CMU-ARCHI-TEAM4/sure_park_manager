@@ -12,12 +12,18 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.lge.sureparkmanager.manager.SystemManager;
+import com.lge.sureparkmanager.utils.Log;
 
 /**
  * Servlet implementation class Reservation
  */
 @WebServlet(description = "reservation for drivers", urlPatterns = { "/reservation" })
 public class Reservation extends HttpServlet {
+	
+	private static final String TAG = Reservation.class.getSimpleName();
 	
 	private String firstName = null;
 	private String lastName = null;
@@ -29,6 +35,7 @@ public class Reservation extends HttpServlet {
 	private String currentDate = null;
 	private String maxDate = null; // 3 hours later
 	private String currentTime = null;
+	private String maxTime = null;
 	
 			
 	private static final long serialVersionUID = 1L;
@@ -73,8 +80,10 @@ public class Reservation extends HttpServlet {
 
 		maxDate = dateFormat.format(tomorrow);
 		
-		dateFormat = new SimpleDateFormat("H:m");
+		dateFormat = new SimpleDateFormat("HH:mm");
 		currentTime = dateFormat.format(date);
+		
+		maxTime = dateFormat.format(tomorrow);
 	}
 
 	/**
@@ -83,9 +92,11 @@ public class Reservation extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		getDateBoudary();
-		getDataFromDB("myID");
 		
-
+		HttpSession session = request.getSession();
+		String id = (String) session.getAttribute("userID");
+		Log.d(TAG, "userID " + id);
+		getDataFromDB(id);
 		
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
@@ -117,12 +128,12 @@ public class Reservation extends HttpServlet {
 		out.println("<td align=\"center\">Start Date </td>");
 
 		
-		out.println("<td><input type=\"date\" name=\"start_date\" " + " max=" + maxDate + " " +  "min=" + currentDate +" "
+		out.println("<td><input type=\"date\" name=\"start_date\" " +  "value=" + currentDate + " max=" + maxDate + " " +  "min=" + currentDate +" "
 				+ "/></td>");
 		out.println("</tr>");
 		out.println("<tr>");
 		out.println("<td align=\"center\">Start Time</td>");
-		out.println("<td><input type=\"time\" name=\"start_time\" " + "value="+ currentTime + " "
+		out.println("<td><input type=\"time\" name=\"start_time\" " + "value="+ currentTime + " max="+ maxTime  +" "
 				+ "/></td>");
 		out.println("</tr>");
 		out.println("<tr>");
@@ -162,10 +173,28 @@ public class Reservation extends HttpServlet {
 		out.println("</body>");
 
 		out.println("</html>");
+
+		
+		
+		String startDate = request.getParameter("start_date");
+		String startTime = request.getParameter("start_time");
+		String endDate = request.getParameter("end_date");
+		String endTime = request.getParameter("end_time");
+
+		Log.d(TAG, "startDate " + startDate);
+		Log.d(TAG, "startTime " + startTime);
+		Log.d(TAG, "endDate " + endDate);
+		Log.d(TAG, "endTime " + endTime);
+		
+		// TODO; store reservation data and get confirmation ID
+		// redirect to confirmation page
+		if (endTime.length() > 4) {
+			response.sendRedirect("confirmation"); 
+		}
+		
+		
+		
 		out.close();
-		
-		
-		
 	}
 
 	/**
@@ -173,12 +202,6 @@ public class Reservation extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		
-		String startDate = request.getParameter("start_date");
-		String startTime = request.getParameter("start_time");
-		
-		System.out.println("hak " + startDate);
-		System.out.println("kkk " + startTime);
 		
 		doGet(request, response);
 		
