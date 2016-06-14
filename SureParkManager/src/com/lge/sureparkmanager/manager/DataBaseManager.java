@@ -3,12 +3,13 @@ package com.lge.sureparkmanager.manager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.lge.sureparkmanager.db.DataBaseConnection;
 import com.lge.sureparkmanager.utils.Log;
 
 public final class DataBaseManager extends SystemManagerBase {
     private static final String TAG = DataBaseManager.class.getSimpleName();
 
-    private DataBaseConnectionManager mDataBaseConnectionManager;
+    private DataBaseConnection mDataBaseConnectionManager;
     private QueryWrapper mQueryWrapper;
     private ResultSet mResultSet;
 
@@ -22,7 +23,7 @@ public final class DataBaseManager extends SystemManagerBase {
 
         Log.d(TAG, "init");
 
-        mDataBaseConnectionManager = new DataBaseConnectionManager();
+        mDataBaseConnectionManager = new DataBaseConnection();
         mQueryWrapper = new QueryWrapper();
     }
 
@@ -53,6 +54,36 @@ public final class DataBaseManager extends SystemManagerBase {
     }
 
     public class QueryWrapper {
+        private static final int CONFIG_NUM = 3;
+        private String[] mConfigurationValues = new String[CONFIG_NUM];
+
+        private QueryWrapper() {
+            // getting server configuration values.
+            getConfiguration();
+        }
+
+        private void getConfiguration() {
+            final String sql = "SELECT value FROM tb_configuration";
+            try {
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
+
+                int idx = 0;
+                while (mResultSet.next()) {
+                    mConfigurationValues[idx++] = mResultSet.getString("value");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
         public boolean isLoginOk(String id, String pw) {
             final String sql = "SELECT id FROM tb_user WHERE id='" + id + "' AND pw='" + pw + "'";
             boolean ret = false;
@@ -81,6 +112,22 @@ public final class DataBaseManager extends SystemManagerBase {
             boolean ret = true;
 
             return ret;
+        }
+
+        public int getSocketPortNum() {
+            return Integer.parseInt(mConfigurationValues[0]);
+        }
+
+        public int getGracePeriodTime() {
+            return Integer.parseInt(mConfigurationValues[1]);
+        }
+
+        public int getHourlyRate() {
+            return Integer.parseInt(mConfigurationValues[2]);
+        }
+
+        public void setMacAddress(String mac) {
+            final String sql = "";
         }
     }
 }

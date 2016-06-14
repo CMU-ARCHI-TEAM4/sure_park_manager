@@ -9,11 +9,14 @@ public final class SystemManager {
 
     public static final int NETWORK_MANAGER = 1;
     public static final int DATABASE_MANAGER = 2;
+    public static final int CONFIGURATION_MANAGER = 3;
+    public static final int COMMAND_MANAGER = 4;
 
     private static SystemManager mInstance;
 
     private HashMap<Integer, SystemManagerBase> mManagers =
             new HashMap<Integer, SystemManagerBase>();
+    private CommandDispatcher mCommandDispatcher;
 
     private boolean mIsInit = false;
 
@@ -30,16 +33,32 @@ public final class SystemManager {
 
     public void init() {
         if (!mIsInit) {
-            Log.d(TAG, "SystemManager init...");
-            // Init NetworkManager.
-            NetworkManager networkManager = new NetworkManager();
-            networkManager.init();
-            mManagers.put(NETWORK_MANAGER, networkManager);
+            Log.d(TAG, "init");
 
-            // Init DataBaseManager.
+            // Initialize DataBaseManager.
             DataBaseManager dataBaseManager = new DataBaseManager();
             dataBaseManager.init();
             mManagers.put(DATABASE_MANAGER, dataBaseManager);
+
+            // Initialize CommandManager.
+            CommandManager commandManager = new CommandManager();
+            commandManager.init();
+            mManagers.put(COMMAND_MANAGER, commandManager);
+
+            // Initialize CommandDispatcher.
+            mCommandDispatcher = new CommandDispatcher();
+            Thread commandDispatcherThread = new Thread(mCommandDispatcher);
+            commandDispatcherThread.start();
+
+            // Initialize ConfigurationManager.
+            ConfigurationManager configurationManager = new ConfigurationManager();
+            configurationManager.init();
+            mManagers.put(CONFIGURATION_MANAGER, configurationManager);
+
+            // Initialize NetworkManager.
+            NetworkManager networkManager = new NetworkManager();
+            networkManager.init();
+            mManagers.put(NETWORK_MANAGER, networkManager);
         } else {
             throw new RuntimeException("SystemManager has been initialized already");
         }
@@ -47,5 +66,9 @@ public final class SystemManager {
 
     public SystemManagerBase getManager(int manager) {
         return mManagers.get(manager);
+    }
+
+    public CommandDispatcher getCommandDispatcher() {
+        return mCommandDispatcher;
     }
 }

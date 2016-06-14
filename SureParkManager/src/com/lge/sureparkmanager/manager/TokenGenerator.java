@@ -1,12 +1,19 @@
 package com.lge.sureparkmanager.manager;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
-public class TokenGenerator {
+public final class TokenGenerator {
+    private static DateFormat mDateFormat = new SimpleDateFormat(
+            "yyyyMMddHHmmss");
+
     public static String generateToken() {
         StringBuilder token = new StringBuilder();
 
-        for (int i = 0; i < 10; i++) {
+        token.append(mDateFormat.format(new Date()));
+        for (int i = 0; i < 6; i++) {
             Random random = new Random();
             int randomInt = random.nextInt(10);
 

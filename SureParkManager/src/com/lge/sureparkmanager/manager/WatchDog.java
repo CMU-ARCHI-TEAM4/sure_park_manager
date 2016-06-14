@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import com.lge.sureparkmanager.utils.Assert;
 import com.lge.sureparkmanager.utils.Log;
 
-public class WatchDog implements Runnable {
+public final class WatchDog implements Runnable {
     private static final String TAG = WatchDog.class.getSimpleName();
 
     private Thread mThread;

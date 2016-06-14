@@ -17,6 +17,8 @@ public final class NetworkManager extends SystemManagerBase {
 
     private ArrayList<SocketObject> mSocketObjects = new ArrayList<SocketObject>();
 
+    private DataBaseManager mDataBaseManager;
+
     public NetworkManager() {
 
     }
@@ -27,7 +29,10 @@ public final class NetworkManager extends SystemManagerBase {
 
         Log.d(TAG, "init");
 
-        WiFiSocket ws = new WiFiSocket(7777);
+        mDataBaseManager = (DataBaseManager) SystemManager.getInstance().
+                getManager(SystemManager.DATABASE_MANAGER);
+
+        WiFiSocket ws = new WiFiSocket(mDataBaseManager.getQueryWrapper().getSocketPortNum());
         ws.start();
     }
 
@@ -169,6 +174,7 @@ public final class NetworkManager extends SystemManagerBase {
             try {
                 while ((line = mIn.readLine()) != null) {
                     Log.d(TAG, line);
+                    SystemManager.getInstance().getCommandDispatcher().put(line);
                     so = getSocketObject(this);
                     sendMessageToTarget(so, line);
                 }

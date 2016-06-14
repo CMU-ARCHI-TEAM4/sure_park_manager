@@ -2,7 +2,7 @@ package com.lge.sureparkmanager.manager;
 
 import com.lge.sureparkmanager.utils.Log;
 
-public class ParkingFacilityManager extends SystemManagerBase {
+public final class ParkingFacilityManager extends SystemManagerBase {
     private static final String TAG = ParkingFacilityManager.class.getSimpleName();
 
     @Override

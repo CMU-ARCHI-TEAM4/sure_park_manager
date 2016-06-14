@@ -16,5 +16,4 @@ public class ManagerInitializer extends HttpServlet {
 		Log.d(TAG, "init");
 		SystemManager.getInstance().init();
 	}
-
 }

@@ -1,9 +1,12 @@
 package com.lge.sureparkmanager.manager;
 
+import com.lge.sureparkmanager.exceptions.CommandParserException;
 import com.lge.sureparkmanager.utils.Log;
 
-public final class ConfigurationManager extends SystemManagerBase {
-    private static final String TAG = ConfigurationManager.class.getSimpleName();
+public final class CommandManager extends SystemManagerBase {
+    private static final String TAG = CommandManager.class.getSimpleName();
+
+    private static final String COMMAND_SEPARATOR = " ";
 
     private DataBaseManager mDataBaseManager;
 
@@ -28,19 +31,18 @@ public final class ConfigurationManager extends SystemManagerBase {
     }
 
     @Override
-    protected void reportDeath() {
+    void reportDeath() {
 
     }
 
-    public int getConfigSocketPortNum() {
-        return mDataBaseManager.getQueryWrapper().getSocketPortNum();
-    }
+    public void parse(String data) {
+        if (data == null) {
+            throw new CommandParserException("data is null");
+        }
 
-    public int getConfigGracePeriodTime() {
-        return mDataBaseManager.getQueryWrapper().getGracePeriodTime();
-    }
-
-    public int getConfigtHourlyRate() {
-        return mDataBaseManager.getQueryWrapper().getHourlyRate();
+        final String[] cmds = data.split(COMMAND_SEPARATOR);
+        for (String cmd : cmds) {
+            Log.d(TAG, cmd);
+        }
     }
 }

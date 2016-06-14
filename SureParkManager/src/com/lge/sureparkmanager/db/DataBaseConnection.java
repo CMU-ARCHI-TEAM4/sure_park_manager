@@ -1,4 +1,4 @@
-package com.lge.sureparkmanager.manager;
+package com.lge.sureparkmanager.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,8 +7,8 @@ import java.sql.Statement;
 
 import com.lge.sureparkmanager.utils.Log;
 
-public final class DataBaseConnectionManager {
-    private static final String TAG = DataBaseConnectionManager.class.getSimpleName();
+public final class DataBaseConnection {
+    private static final String TAG = DataBaseConnection.class.getSimpleName();
 
     private String mUrl = "jdbc:mysql://localhost/sure_park_system?autoReconnect=true&useSSL=true";
     private String mId = "root";
@@ -17,7 +17,7 @@ public final class DataBaseConnectionManager {
     private Connection mConnection = null;
     private Statement mStatement = null;
 
-    public DataBaseConnectionManager() {
+    public DataBaseConnection() {
         init();
     }
 
