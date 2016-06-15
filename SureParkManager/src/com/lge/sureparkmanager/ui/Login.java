@@ -38,26 +38,19 @@ public class Login extends HttpServlet {
 		
 		request.setAttribute("id", "hello");
 
-		HttpSession session = request.getSession();
-		session.setAttribute("userID", id);
-		
 		Log.d(this.getClass().getName(), "userID " +  id);
-		response.sendRedirect("reservation.html"); 
-		
-		
-		
-		
+
 		//response.sendRedirect("SureParkManager/reservation.html"); 
-//		DataBaseManager dbm = (DataBaseManager)SystemManager.getInstance().getManager(
-//		        SystemManager.DATABASE_MANAGER);
-//		if (dbm.getQueryWrapper().isLoginOk(id, pw)) {
-//			HttpSession session = request.getSession();
-//			session.setAttribute("userID", id);
-//			response.sendRedirect("/reservation.html"); 
-//		    //Html.writeHTML(response, "login success");
-//		} else {
-//		    Html.writeHTML(response, "login fail");
-//		}
+		DataBaseManager dbm = (DataBaseManager)SystemManager.getInstance().getManager(
+		        SystemManager.DATABASE_MANAGER);
+		if (dbm.getQueryWrapper().isLoginOk(id, pw)) {
+			HttpSession session = request.getSession();
+			session.setAttribute("userID", id);
+			response.sendRedirect("reservation"); 
+		    //Html.writeHTML(response, "login success");
+		} else {
+			response.sendRedirect("welcome.html");
+		}
 
 		//NetworkManager networkManager = (NetworkManager)SystemManager.getInstance().getManager(
         //        SystemManager.NETWORK_MANAGER);

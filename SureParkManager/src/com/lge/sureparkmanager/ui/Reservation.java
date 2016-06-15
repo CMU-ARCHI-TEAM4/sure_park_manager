@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.lge.sureparkmanager.db.UserInformation;
+import com.lge.sureparkmanager.manager.DataBaseManager;
 import com.lge.sureparkmanager.manager.SystemManager;
 import com.lge.sureparkmanager.utils.Log;
 
@@ -54,14 +56,24 @@ public class Reservation extends HttpServlet {
      */
     private void getDataFromDB(String id) {
     	
-    	// TODO get the user information by id
-    	
-    	firstName = "hakjoo";
-    	lastName = "lee";
-    	email = "hakjoo.lee@lge.com";
-    	phoneNumeber = "0117668592";
-    	creditCardNumber = "111222233334444";
-    	creditValidation = "20161101";
+    	DataBaseManager dbm = (DataBaseManager)SystemManager.getInstance().getManager(
+		        SystemManager.DATABASE_MANAGER);
+    	UserInformation ui = dbm.getQueryWrapper().getUserInfomation(id);
+		
+    	firstName = ui.getFristName();
+    	lastName = ui.getLastName();
+    	email = ui.getEmail();
+    	phoneNumeber = ui.getPhoneNumber();
+    	creditCardNumber = ui.getCreditCardNumber();
+    	creditValidation = ui.getCreditCardValidation();
+    }
+    
+    private void makeConfirmationID(String id, String startDate, String startTime, String endDate, String endTime){
+    
+    	DataBaseManager dbm = (DataBaseManager)SystemManager.getInstance().getManager(
+		        SystemManager.DATABASE_MANAGER);
+    	//TODO; make string with date and time
+    	dbm.getQueryWrapper().addReservation(id, startTime, endTime);
     }
     
     /**
@@ -173,8 +185,6 @@ public class Reservation extends HttpServlet {
 		out.println("</body>");
 
 		out.println("</html>");
-
-		
 		
 		String startDate = request.getParameter("start_date");
 		String startTime = request.getParameter("start_time");
@@ -188,7 +198,8 @@ public class Reservation extends HttpServlet {
 		
 		// TODO; store reservation data and get confirmation ID
 		// redirect to confirmation page
-		if (endTime.length() > 4) {
+		if (endTime != null && endTime.length() > 4) {
+			makeConfirmationID(id, startDate, startTime, endDate, endTime);
 			response.sendRedirect("confirmation"); 
 		}
 		
