@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import com.lge.sureparkmanager.db.DataBaseConnection;
+import com.lge.sureparkmanager.db.UserInformation;
 import com.lge.sureparkmanager.utils.Log;
 import com.lge.sureparkmanager.utils.Utils;
 
@@ -157,8 +158,8 @@ public final class DataBaseManager extends SystemManagerBase {
                 if (rowCount == 0) {
                     newController = true;
                     nextControllerName = "A";
-                    final String inSql = "INSERT INTO tb_controller(mac_addr, name) " +
-                            "VALUES('" + mac + "','" + nextControllerName + "')";
+                    final String inSql = "INSERT INTO tb_controller(mac_addr, name) " + "VALUES('" + mac + "','"
+                            + nextControllerName + "')";
                     mDataBaseConnectionManager.getStatement().executeUpdate(inSql);
                 } else {
                     boolean exist = false;
@@ -176,8 +177,8 @@ public final class DataBaseManager extends SystemManagerBase {
                     if (!exist && macAddr != null && name != null) {
                         newController = true;
                         nextControllerName = Utils.getNextControllerName(name);
-                        final String inSql = "INSERT INTO tb_controller(mac_addr, name) " +
-                                "VALUES('" + mac + "','" + nextControllerName + "')";
+                        final String inSql = "INSERT INTO tb_controller(mac_addr, name) " + "VALUES('" + mac + "','"
+                                + nextControllerName + "')";
                         mDataBaseConnectionManager.getStatement().executeUpdate(inSql);
                     } else {
                         Log.d(TAG, "already existing controller");
@@ -188,8 +189,7 @@ public final class DataBaseManager extends SystemManagerBase {
                     ArrayList<String> plnList = Utils.generateParkingLotNum(parkingLotNum);
                     for (String pln : plnList) {
                         final String parkingLotName = nextControllerName + pln;
-                        final String inSql = "INSERT INTO tb_parkinglot(name) " +
-                                "VALUES('" + parkingLotName + "')";
+                        final String inSql = "INSERT INTO tb_parkinglot(name) " + "VALUES('" + parkingLotName + "')";
                         mDataBaseConnectionManager.getStatement().executeUpdate(inSql);
                     }
                 }
@@ -204,6 +204,75 @@ public final class DataBaseManager extends SystemManagerBase {
                     }
                 }
             }
+        }
+
+        public UserInformation getUserInfomation(String id) {
+            final String sql = "SELECT * FROM tb_user WHERE id='" + id + "'";
+            UserInformation ret = null;
+
+            try {
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
+                mResultSet.next();
+
+                String _firstName = mResultSet.getString("first_name");
+                String _lastName = mResultSet.getString("last_name");
+                String _email = mResultSet.getString("email");
+                String _phoneNumber = mResultSet.getString("phone_number");
+                String _credit_card_num = mResultSet.getString("credit_card_num");
+                String _credit_card_date = mResultSet.getString("credit_card_val_date");
+
+                ret = new UserInformation(id, _firstName, _lastName, _email, _phoneNumber, _credit_card_num,
+                        _credit_card_date);
+
+                System.out.println(ret.getFristName() + " " + ret.getLastName());
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return ret;
+        }
+
+        public String addReservation(String id, String startTime, String endTime) {
+
+            final String sqlUser = "SELECT idx FROM tb_user WHERE id='" + id + "'";
+            try {
+
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlUser);
+                mResultSet.next();
+                String _idx = mResultSet.getString("idx");
+                System.out.println("idx !!!!!!!" + _idx);
+
+                // TODO: choose parking lot, get confirmation id
+                String _confirm_id = "A0001";
+                final String sql = "INSERT into tb_reservation (tb_user_idx, start_time, end_time, tb_parkinglot_idx, confirm_id) VALUES('"
+                        + _idx + "', '" + startTime + "', '" + endTime + "', '1', '" + _confirm_id + "')";
+
+                mDataBaseConnectionManager.getStatement().executeUpdate(sql);
+
+                return _confirm_id;
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return null;
         }
     }
 }
