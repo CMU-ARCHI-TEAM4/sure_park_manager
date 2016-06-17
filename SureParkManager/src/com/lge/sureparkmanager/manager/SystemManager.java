@@ -16,7 +16,7 @@ public final class SystemManager {
 
     private HashMap<Integer, SystemManagerBase> mManagers =
             new HashMap<Integer, SystemManagerBase>();
-    private CommandDispatcher mCommandDispatcher;
+    private CommandQueue mCommandQueue;
 
     private boolean mIsInit = false;
 
@@ -46,8 +46,8 @@ public final class SystemManager {
             mManagers.put(COMMAND_MANAGER, commandManager);
 
             // Initialize CommandDispatcher.
-            mCommandDispatcher = new CommandDispatcher();
-            Thread commandDispatcherThread = new Thread(mCommandDispatcher);
+            mCommandQueue = new CommandQueue();
+            Thread commandDispatcherThread = new Thread(mCommandQueue);
             commandDispatcherThread.start();
 
             // Initialize ConfigurationManager.
@@ -68,7 +68,7 @@ public final class SystemManager {
         return mManagers.get(manager);
     }
 
-    public CommandDispatcher getCommandDispatcher() {
-        return mCommandDispatcher;
+    public CommandQueue getCommandQueue() {
+        return mCommandQueue;
     }
 }

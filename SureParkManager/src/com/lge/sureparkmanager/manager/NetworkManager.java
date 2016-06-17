@@ -174,7 +174,7 @@ public final class NetworkManager extends SystemManagerBase {
             try {
                 while ((line = mIn.readLine()) != null) {
                     Log.d(TAG, line);
-                    SystemManager.getInstance().getCommandDispatcher().put(line);
+                    SystemManager.getInstance().getCommandQueue().put(line);
                     so = getSocketObject(this);
                     sendMessageToTarget(so, line);
                 }

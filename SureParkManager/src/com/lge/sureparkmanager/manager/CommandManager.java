@@ -8,16 +8,14 @@ public final class CommandManager extends SystemManagerBase {
 
     private static final String COMMAND_SEPARATOR = " ";
 
-    private DataBaseManager mDataBaseManager;
+    private CommandDispatcher mCommandDispatcher;
 
     @Override
     protected void init() {
         super.init();
 
         Log.d(TAG, "init");
-
-        mDataBaseManager = (DataBaseManager) SystemManager.getInstance().
-                getManager(SystemManager.DATABASE_MANAGER);
+        mCommandDispatcher = new CommandDispatcher();
     }
 
     @Override
@@ -41,8 +39,30 @@ public final class CommandManager extends SystemManagerBase {
         }
 
         final String[] cmds = data.split(COMMAND_SEPARATOR);
-        for (String cmd : cmds) {
-            Log.d(TAG, cmd);
+
+        final int first = Integer.parseInt(cmds[0]);
+        switch (first) {
+            case Commands.CMD_REQ:
+                break;
+            case Commands.CMD_RES:
+                break;
+            default:
+                break;
+        }
+        final String macAddr = cmds[1];
+
+        for (int i = 2; i < cmds.length; i++) {
+            final String cmd = cmds[i];
+            final int c = Integer.parseInt(cmd);
+            switch (c) {
+                case Commands.CMD_DEVICE_INFO:
+                    String mac = cmds[++i];
+                    int parkingLotNum = Integer.parseInt(cmds[++i]);
+                    mCommandDispatcher.setDeviceInfo(mac, parkingLotNum);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
