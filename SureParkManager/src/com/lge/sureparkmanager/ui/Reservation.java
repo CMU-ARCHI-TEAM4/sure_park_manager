@@ -243,6 +243,12 @@ public class Reservation extends HttpServlet {
 		// redirect to confirmation page
 		if (endTime != null && endDate != null) {
 			final String confirmID = makeConfirmationID(id, facility, startDate, startTime, endDate, endTime);
+			if (confirmID == null) {
+				// TODO; failed to reserve
+				response.sendRedirect("welcome.html");
+				out.close();
+				return;
+			}
 			session.setAttribute("confirmID", confirmID);
 			response.sendRedirect("confirmation"); 
 		}
