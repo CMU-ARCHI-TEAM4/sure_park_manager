@@ -11,6 +11,7 @@ public final class SystemManager {
     public static final int DATABASE_MANAGER = 2;
     public static final int CONFIGURATION_MANAGER = 3;
     public static final int COMMAND_MANAGER = 4;
+    public static final int CHARGE_MANAGER = 5;
 
     private static SystemManager mInstance;
 
@@ -36,29 +37,35 @@ public final class SystemManager {
             Log.d(TAG, "init");
 
             // Initialize DataBaseManager.
-//            DataBaseManager dataBaseManager = new DataBaseManager();
-//            dataBaseManager.init();
-//            mManagers.put(DATABASE_MANAGER, dataBaseManager);
-//
-//            // Initialize CommandManager.
-//            CommandManager commandManager = new CommandManager();
-//            commandManager.init();
-//            mManagers.put(COMMAND_MANAGER, commandManager);
-//
-//            // Initialize CommandDispatcher.
-//            mCommandQueue = new CommandQueue();
-//            Thread commandDispatcherThread = new Thread(mCommandQueue);
-//            commandDispatcherThread.start();
-//
-//            // Initialize ConfigurationManager.
-//            ConfigurationManager configurationManager = new ConfigurationManager();
-//            configurationManager.init();
-//            mManagers.put(CONFIGURATION_MANAGER, configurationManager);
-//
-//            // Initialize NetworkManager.
-//            NetworkManager networkManager = new NetworkManager();
-//            networkManager.init();
-//            mManagers.put(NETWORK_MANAGER, networkManager);
+            DataBaseManager dataBaseManager = new DataBaseManager();
+            dataBaseManager.init();
+            mManagers.put(DATABASE_MANAGER, dataBaseManager);
+
+            // Initialize CommandManager.
+            CommandManager commandManager = new CommandManager();
+            commandManager.init();
+            mManagers.put(COMMAND_MANAGER, commandManager);
+
+            // Initialize CommandDispatcher.
+            mCommandQueue = new CommandQueue();
+            Thread commandDispatcherThread = new Thread(mCommandQueue);
+            commandDispatcherThread.start();
+
+            // Initialize ConfigurationManager.
+            ConfigurationManager configurationManager = new ConfigurationManager();
+            configurationManager.init();
+            mManagers.put(CONFIGURATION_MANAGER, configurationManager);
+
+            // Initialize NetworkManager.
+            NetworkManager networkManager = new NetworkManager();
+            networkManager.init();
+            mManagers.put(NETWORK_MANAGER, networkManager);
+            
+            // Initialize CharegeManager.
+            ChargeManager chargeManager = new ChargeManager();
+            chargeManager.init();
+            mManagers.put(CHARGE_MANAGER, chargeManager);
+            
         } else {
             throw new RuntimeException("SystemManager has been initialized already");
         }
