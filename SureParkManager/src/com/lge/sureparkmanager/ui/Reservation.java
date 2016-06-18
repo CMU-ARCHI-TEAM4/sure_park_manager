@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -39,6 +41,9 @@ public class Reservation extends HttpServlet {
 	private String currentTime = null;
 	private String maxTime = null;
 	
+	private DataBaseManager dbm = (DataBaseManager)SystemManager.getInstance().getManager(
+	        SystemManager.DATABASE_MANAGER);
+	
 			
 	private static final long serialVersionUID = 1L;
        
@@ -51,13 +56,11 @@ public class Reservation extends HttpServlet {
     }
     
     /**
-     * get user inforamtion from DB
+     * get user information from DB
      * @param id
      */
     private void getDataFromDB(String id) {
     	
-    	DataBaseManager dbm = (DataBaseManager)SystemManager.getInstance().getManager(
-		        SystemManager.DATABASE_MANAGER);
     	UserInformation ui = dbm.getQueryWrapper().getUserInfomation(id);
 		
     	firstName = ui.getFristName();
@@ -68,14 +71,31 @@ public class Reservation extends HttpServlet {
     	creditValidation = ui.getCreditCardValidation();
     }
     
-    private void makeConfirmationID(String id, String startDate, String startTime, String endDate, String endTime){
+    /**
+     * make confirmation id
+     * @param id
+     * @param facility
+     * @param startDate
+     * @param startTime
+     * @param endDate
+     * @param endTime
+     * @return
+     */
+    private String makeConfirmationID(String id, String facility, String startDate, String startTime, String endDate, String endTime){
     
-    	DataBaseManager dbm = (DataBaseManager)SystemManager.getInstance().getManager(
-		        SystemManager.DATABASE_MANAGER);
-    	//TODO; make string with date and time
-    	dbm.getQueryWrapper().addReservation(id, startTime, endTime);
+    	final String start = startDate + " " + startTime;
+    	final String end = endDate + " "+ endTime;
+
+    	return dbm.getQueryWrapper().addReservation(id, facility, start, end);
     }
     
+    /**
+     * get list of facility
+     * @return list
+     */
+    private List<String> getListOfFacility() {
+    	return dbm.getQueryWrapper().getListOfFacility();
+    }
     /**
      * get boundary date
      */
@@ -103,12 +123,22 @@ public class Reservation extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-		getDateBoudary();
-		
 		HttpSession session = request.getSession();
 		String id = (String) session.getAttribute("userID");
 		Log.d(TAG, "userID " + id);
+		
+		getDateBoudary();
 		getDataFromDB(id);
+		List<String> facilities = getListOfFacility();
+		
+		//TEST CODE; remove it
+		//List<String> facilities = new ArrayList<String>();
+		//facilities.add("A");
+		//facilities.add("B");
+		//END TEST CODE
+		
+		//default facility
+		String facility = facilities.get(0);
 		
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
@@ -136,10 +166,22 @@ public class Reservation extends HttpServlet {
 		out.println("<td><input type=\"text\" name=\"last_name\" value=" + lastName +" "
 				+ "readonly/></td>");
 		out.println("</tr>");
+		
+		final int size = facilities.size();
+		if (size > 1) {
+			out.println("<tr>");
+			out.println("<td align=\"center\">Facility</td>");
+			out.println("<td><select name=\"facility\">");
+			for (int i=0; i<size; i++) {
+				out.println("<option value=\"" + facilities.get(i)  + "\">" + facilities.get(i) + "</option>");
+			}
+			out.println("<td></select>");
+		}
+		
+		out.println("</tr>");
+		
 		out.println("<tr>");
 		out.println("<td align=\"center\">Start Date </td>");
-
-		
 		out.println("<td><input type=\"date\" name=\"start_date\" " +  "value=" + currentDate + " max=" + maxDate + " " +  "min=" + currentDate +" "
 				+ "/></td>");
 		out.println("</tr>");
@@ -186,24 +228,24 @@ public class Reservation extends HttpServlet {
 
 		out.println("</html>");
 		
-		String startDate = request.getParameter("start_date");
-		String startTime = request.getParameter("start_time");
-		String endDate = request.getParameter("end_date");
-		String endTime = request.getParameter("end_time");
+		final String startDate = request.getParameter("start_date");
+		final String startTime = request.getParameter("start_time");
+		final String endDate = request.getParameter("end_date");
+		final String endTime = request.getParameter("end_time");
+		facility = request.getParameter("facility");
 
 		Log.d(TAG, "startDate " + startDate);
 		Log.d(TAG, "startTime " + startTime);
 		Log.d(TAG, "endDate " + endDate);
 		Log.d(TAG, "endTime " + endTime);
+		Log.d(TAG, "facility " + facility);
 		
-		// TODO; store reservation data and get confirmation ID
 		// redirect to confirmation page
-		if (endTime != null && endTime.length() > 4) {
-			makeConfirmationID(id, startDate, startTime, endDate, endTime);
+		if (endTime != null && endDate != null) {
+			final String confirmID = makeConfirmationID(id, facility, startDate, startTime, endDate, endTime);
+			session.setAttribute("confirmID", confirmID);
 			response.sendRedirect("confirmation"); 
 		}
-		
-		
 		
 		out.close();
 	}

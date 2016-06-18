@@ -1,8 +1,10 @@
 package com.lge.sureparkmanager.manager;
 
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.lge.sureparkmanager.db.DataBaseConnection;
 import com.lge.sureparkmanager.db.UserInformation;
@@ -115,7 +117,7 @@ public final class DataBaseManager extends SystemManagerBase {
             } catch (SQLException e) {
                 e.printStackTrace();
             } finally {
-                if (mResultSet != null) {
+                if (mResultSet != null) {	
                     try {
                         mResultSet.close();
                     } catch (SQLException e) {
@@ -224,7 +226,7 @@ public final class DataBaseManager extends SystemManagerBase {
                 ret = new UserInformation(id, _firstName, _lastName, _email, _phoneNumber, _credit_card_num,
                         _credit_card_date);
 
-                System.out.println(ret.getFristName() + " " + ret.getLastName());
+                Log.d(TAG, ret.getFristName() + " " + ret.getLastName());
 
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -241,7 +243,7 @@ public final class DataBaseManager extends SystemManagerBase {
             return ret;
         }
 
-        public String addReservation(String id, String startTime, String endTime) {
+        public String addReservation(String id, String parkingFacility, String startTime, String endTime) {
 
             final String sqlUser = "SELECT idx FROM tb_user WHERE id='" + id + "'";
             try {
@@ -249,12 +251,34 @@ public final class DataBaseManager extends SystemManagerBase {
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlUser);
                 mResultSet.next();
                 String _idx = mResultSet.getString("idx");
-                System.out.println("idx !!!!!!!" + _idx);
-
-                // TODO: choose parking lot, get confirmation id
-                String _confirm_id = "A0001";
+                
+                Log.d(TAG, "add reservation info with " + id);
+                
+                String _confirm_id = TokenGenerator.generateToken();
+                Log.d(TAG, "add reservation info confirm id  " + _confirm_id);
+                
+                //find empty parking lot at that time
+                final String sqlTime = "SELECT tb_parkinglot_idx FROM tb_reservation WHERE (start_time <= startTime AND end_time > startTime) OR (start_time < endTime AND end_time >= endTime)";
+                
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlTime);
+                
+                Log.d(TAG, "out of lots" + mResultSet.getFetchSize());
+                
+                // check the number of lots
+                if (mResultSet.getFetchSize() > 4) {
+                	Log.d(TAG, "out of lots");
+                }
+                
+                mResultSet.next();
+                String parkinglot = mResultSet.getString("tb_parkinglot_idx");
+                
+                
+                
+                //TODO; get the number of lot in parkingFacility
+                String _empty_lot = "1";
+                
                 final String sql = "INSERT into tb_reservation (tb_user_idx, start_time, end_time, tb_parkinglot_idx, confirm_id) VALUES('"
-                        + _idx + "', '" + startTime + "', '" + endTime + "', '1', '" + _confirm_id + "')";
+                        + _idx + "', '" + startTime + "', '" + endTime + "', '" + _empty_lot + "', '" + _confirm_id + "')";
 
                 mDataBaseConnectionManager.getStatement().executeUpdate(sql);
 
@@ -274,5 +298,38 @@ public final class DataBaseManager extends SystemManagerBase {
 
             return null;
         }
+        
+        public List<String> getListOfFacility() {
+        	
+        	//TODO; fix table name and column name
+            final String sql = "SELECT * FROM tb_user";
+            ArrayList<String> ret = new ArrayList<String>();
+            
+            try {
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
+
+                while (mResultSet.next()) {
+                	ret.add(mResultSet.getString("facility"));
+                }
+                
+                Log.d(TAG, "Get list of facility" + ret.size());
+                
+                return ret;
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return ret;
+        }
+        
     }
 }

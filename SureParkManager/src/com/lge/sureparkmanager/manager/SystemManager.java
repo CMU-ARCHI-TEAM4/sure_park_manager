@@ -36,29 +36,29 @@ public final class SystemManager {
             Log.d(TAG, "init");
 
             // Initialize DataBaseManager.
-            DataBaseManager dataBaseManager = new DataBaseManager();
-            dataBaseManager.init();
-            mManagers.put(DATABASE_MANAGER, dataBaseManager);
-
-            // Initialize CommandManager.
-            CommandManager commandManager = new CommandManager();
-            commandManager.init();
-            mManagers.put(COMMAND_MANAGER, commandManager);
-
-            // Initialize CommandDispatcher.
-            mCommandQueue = new CommandQueue();
-            Thread commandDispatcherThread = new Thread(mCommandQueue);
-            commandDispatcherThread.start();
-
-            // Initialize ConfigurationManager.
-            ConfigurationManager configurationManager = new ConfigurationManager();
-            configurationManager.init();
-            mManagers.put(CONFIGURATION_MANAGER, configurationManager);
-
-            // Initialize NetworkManager.
-            NetworkManager networkManager = new NetworkManager();
-            networkManager.init();
-            mManagers.put(NETWORK_MANAGER, networkManager);
+//            DataBaseManager dataBaseManager = new DataBaseManager();
+//            dataBaseManager.init();
+//            mManagers.put(DATABASE_MANAGER, dataBaseManager);
+//
+//            // Initialize CommandManager.
+//            CommandManager commandManager = new CommandManager();
+//            commandManager.init();
+//            mManagers.put(COMMAND_MANAGER, commandManager);
+//
+//            // Initialize CommandDispatcher.
+//            mCommandQueue = new CommandQueue();
+//            Thread commandDispatcherThread = new Thread(mCommandQueue);
+//            commandDispatcherThread.start();
+//
+//            // Initialize ConfigurationManager.
+//            ConfigurationManager configurationManager = new ConfigurationManager();
+//            configurationManager.init();
+//            mManagers.put(CONFIGURATION_MANAGER, configurationManager);
+//
+//            // Initialize NetworkManager.
+//            NetworkManager networkManager = new NetworkManager();
+//            networkManager.init();
+//            mManagers.put(NETWORK_MANAGER, networkManager);
         } else {
             throw new RuntimeException("SystemManager has been initialized already");
         }

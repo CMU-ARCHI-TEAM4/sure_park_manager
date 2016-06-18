@@ -33,14 +33,13 @@ public class Confirmation extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		
 		HttpSession session = request.getSession();
 		String id = (String) session.getAttribute("userID");
-		Log.d(TAG, "userID " + id);
+		String confirmID = (String) session.getAttribute("confirmID");
 		
-		//TODO ; get confirmation ID from DB
-		String confiramtionID = "201606111530_A0001";
+		Log.d(TAG, "userID " + id);
+		Log.d(TAG, "confirmID " + confirmID);
 		
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
@@ -58,10 +57,10 @@ public class Confirmation extends HttpServlet {
 		out.println("<form action=\"confirmation\" method=\"post\">");
 		out.println("<table class=\"centerTable\">");
 		
-		out.println("<tr ><td colspan=\"2\" align=\"center\"><h1>Confirmation ID of Your Reservation</h1></td></tr>");
+		out.println("<tr ><td colspan=\"2\" align=\"center\"><h1>Thank you for Reservation! </br> Confirmation ID</h1></td></tr>");
 		out.println("<tr>");
 		out.println("<td align=\"center\">ID</td>");
-		out.println("<td><input type=\"text\" name=\"first_name\" value=" + confiramtionID +" "
+		out.println("<td><input type=\"text\" name=\"first_name\" value=" + confirmID +" "
 				+ "readonly/></td>");
 		out.println("</tr>");
 		
