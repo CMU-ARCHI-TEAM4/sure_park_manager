@@ -176,7 +176,15 @@ public final class NetworkManager extends SystemManagerBase {
                     Log.d(TAG, line);
                     SystemManager.getInstance().getCommandQueue().put(line);
                     so = getSocketObject(this);
-                    sendMessageToTarget(so, line);
+
+                    // send echo.
+                    int echoFirstCmd = -1;
+                    if (line.startsWith(String.valueOf(Commands.CMD_REQ))) {
+                        echoFirstCmd = Commands.CMD_RES;
+                    } else {
+                        echoFirstCmd = Commands.CMD_REQ;
+                    }
+                    sendMessageToTarget(so, echoFirstCmd + line.substring(1));
                 }
             } catch (IOException e) {
                 Log.d(TAG, "connection terminated...");

@@ -11,18 +11,18 @@ public final class SystemManager {
     public static final int DATABASE_MANAGER = 2;
     public static final int CONFIGURATION_MANAGER = 3;
     public static final int COMMAND_MANAGER = 4;
-    public static final int CHARGE_MANAGER = 5;
+    public static final int INFO_PROVIDER_MANAGER = 5;
+    public static final int ALIVE_CHECKER_MANAGER = 6;
 
     private static SystemManager mInstance;
 
-    private HashMap<Integer, SystemManagerBase> mManagers =
-            new HashMap<Integer, SystemManagerBase>();
+    private HashMap<Integer, SystemManagerBase> mManagers = new HashMap<Integer, SystemManagerBase>();
     private CommandQueue mCommandQueue;
 
     private boolean mIsInit = false;
 
     private SystemManager() {
-        
+
     }
 
     public static synchronized SystemManager getInstance() {
@@ -46,26 +46,30 @@ public final class SystemManager {
             commandManager.init();
             mManagers.put(COMMAND_MANAGER, commandManager);
 
-            // Initialize CommandDispatcher.
+            // Initialize CommandQueue.
             mCommandQueue = new CommandQueue();
-            Thread commandDispatcherThread = new Thread(mCommandQueue);
-            commandDispatcherThread.start();
+            Thread commandQueueThread = new Thread(mCommandQueue);
+            commandQueueThread.start();
 
             // Initialize ConfigurationManager.
             ConfigurationManager configurationManager = new ConfigurationManager();
             configurationManager.init();
             mManagers.put(CONFIGURATION_MANAGER, configurationManager);
 
+            // Initialize InfoProviderManager.
+            InfoProviderManager infoProviderManager = new InfoProviderManager();
+            infoProviderManager.init();
+            mManagers.put(INFO_PROVIDER_MANAGER, infoProviderManager);
+
             // Initialize NetworkManager.
             NetworkManager networkManager = new NetworkManager();
             networkManager.init();
             mManagers.put(NETWORK_MANAGER, networkManager);
-            
-            // Initialize CharegeManager.
-            ChargeManager chargeManager = new ChargeManager();
-            chargeManager.init();
-            mManagers.put(CHARGE_MANAGER, chargeManager);
-            
+
+            // Initialize AliveCheckerManager.
+            AliveCheckerManager aliveCheckerManager = new AliveCheckerManager();
+            aliveCheckerManager.init();
+            mManagers.put(ALIVE_CHECKER_MANAGER, aliveCheckerManager);
         } else {
             throw new RuntimeException("SystemManager has been initialized already");
         }
@@ -73,6 +77,10 @@ public final class SystemManager {
 
     public SystemManagerBase getManager(int manager) {
         return mManagers.get(manager);
+    }
+
+    public DataBaseManager getDataBaseManager() {
+        return (DataBaseManager) mManagers.get(DATABASE_MANAGER);
     }
 
     public CommandQueue getCommandQueue() {

@@ -2,6 +2,7 @@ package com.lge.sureparkmanager.manager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -56,6 +57,10 @@ public final class DataBaseManager extends SystemManagerBase {
 
     public QueryWrapper getQueryWrapper() {
         return mQueryWrapper;
+    }
+
+    public Statement getStatement() {
+        return mDataBaseConnectionManager.getStatement();
     }
 
     private int getResultSetSize(ResultSet rs) {
@@ -117,7 +122,7 @@ public final class DataBaseManager extends SystemManagerBase {
             } catch (SQLException e) {
                 e.printStackTrace();
             } finally {
-                if (mResultSet != null) {	
+                if (mResultSet != null) {
                     try {
                         mResultSet.close();
                     } catch (SQLException e) {
@@ -127,6 +132,75 @@ public final class DataBaseManager extends SystemManagerBase {
             }
 
             return ret;
+        }
+
+        public String getParkingFacilityName(String mac) {
+            final String sql = "SELECT name FROM tb_controller WHERE mac_addr='" + mac + "'";
+            String parkingFacilityName = null;
+            try {
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
+                while (mResultSet.next()) {
+                    parkingFacilityName = mResultSet.getString("name");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return parkingFacilityName;
+        }
+
+        public String getParkingFacilityMacAddr(String pfn) {
+            final String sql = "SELECT mac_addr FROM tb_controller WHERE name='" + pfn + "'";
+            String parkingFacilityMacAddr = null;
+            try {
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
+                while (mResultSet.next()) {
+                    parkingFacilityMacAddr = mResultSet.getString("mac_addr");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return parkingFacilityMacAddr;
+        }
+
+        public int getParkingLotIdx(String pln) {
+            final String sql = "SELECT idx FROM tb_parkinglot WHERE name='" + pln + "'";
+            int idx = -1;
+            try {
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
+                while (mResultSet.next()) {
+                    idx = mResultSet.getInt("idx");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return idx;
         }
 
         public boolean existConfirmationId(String id) {
@@ -160,8 +234,9 @@ public final class DataBaseManager extends SystemManagerBase {
                 if (rowCount == 0) {
                     newController = true;
                     nextControllerName = "A";
-                    final String inSql = "INSERT INTO tb_controller(mac_addr, name) " + "VALUES('" + mac + "','"
-                            + nextControllerName + "')";
+                    final String inSql = "INSERT INTO tb_controller(mac_addr, name, parkinglot_num) "
+                            + "VALUES('" + mac + "','" + nextControllerName + "','" + parkingLotNum
+                            + ")";
                     mDataBaseConnectionManager.getStatement().executeUpdate(inSql);
                 } else {
                     boolean exist = false;
@@ -179,8 +254,9 @@ public final class DataBaseManager extends SystemManagerBase {
                     if (!exist && macAddr != null && name != null) {
                         newController = true;
                         nextControllerName = Utils.getNextControllerName(name);
-                        final String inSql = "INSERT INTO tb_controller(mac_addr, name) " + "VALUES('" + mac + "','"
-                                + nextControllerName + "')";
+                        final String inSql = "INSERT INTO tb_controller(mac_addr, name, parkinglot_num) "
+                                + "VALUES('" + mac + "','" + nextControllerName + "','"
+                                + parkingLotNum + ")";
                         mDataBaseConnectionManager.getStatement().executeUpdate(inSql);
                     } else {
                         Log.d(TAG, "already existing controller");
@@ -191,7 +267,8 @@ public final class DataBaseManager extends SystemManagerBase {
                     ArrayList<String> plnList = Utils.generateParkingLotNum(parkingLotNum);
                     for (String pln : plnList) {
                         final String parkingLotName = nextControllerName + pln;
-                        final String inSql = "INSERT INTO tb_parkinglot(name) " + "VALUES('" + parkingLotName + "')";
+                        final String inSql = "INSERT INTO tb_parkinglot(name) " + "VALUES('"
+                                + parkingLotName + "')";
                         mDataBaseConnectionManager.getStatement().executeUpdate(inSql);
                     }
                 }
@@ -208,11 +285,138 @@ public final class DataBaseManager extends SystemManagerBase {
             }
         }
 
-        /**
-         * get user information
-         * @param id
-         * @return
-         */
+        public void setParkEntryGateInfo(String mac, String status) {
+            final String sql = "UPDATE tb_controller SET entry_gate='" + status
+                    + "' WHERE mac_addr='" + mac + "'";
+            try {
+                mDataBaseConnectionManager.getStatement().executeUpdate(sql);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        public void setParkExitGateInfo(String mac, String status) {
+            final String sql = "UPDATE tb_controller SET exit_gate='" + status
+                    + "' WHERE mac_addr='" + mac + "'";
+            try {
+                mDataBaseConnectionManager.getStatement().executeUpdate(sql);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        public String getParkStatusInfo(String pfn) {
+            String rsp = "";
+            final String sql = "SELECT name, status FROM tb_parkinglot WHERE name LIKE '" + pfn + "%'";
+            try {
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
+                while (mResultSet.next()) {
+                    rsp += mResultSet.getString("name");
+                    rsp += ":" + mResultSet.getString("status") + "^";
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return rsp;
+        }
+
+        public void setParkStatusInfo(String mac, String status, String parkingLotNum,
+                String charging) {
+            final String parkingFacilityName = getParkingFacilityName(mac);
+            final String parkingLotName = Utils.getParkingLotName(parkingFacilityName,
+                    parkingLotNum);
+            //final int parkingLotIdx = getParkingLotIdx(parkingLotName);
+            final String sql = "UPDATE tb_parkinglot SET status='" + status
+                    + "' WHERE name='" + parkingLotName + "'";
+            try {
+                mDataBaseConnectionManager.getStatement().executeUpdate(sql);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        public ArrayList<String> getParkingFacilityInfo() {
+            ArrayList<String> parkingName = new ArrayList<String>();
+            final String sql = "SELECT mac_addr, name, parkinglot_num FROM tb_controller";
+            try {
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
+                while (mResultSet.next()) {
+                    parkingName.add(
+                            mResultSet.getString("mac_addr") + "^" + mResultSet.getString("name")
+                                    + "^" + mResultSet.getString("parkinglot_num"));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return parkingName;
+        }
+
+        public ArrayList<String> getParkingLotInfo(String pfName) {
+            ArrayList<String> parkingLotInfos = new ArrayList<String>();
+            final String sql = "SELECT * FROM tb_parkinglot WHERE name LIKE '" + pfName + "%'";
+            try {
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
+                while (mResultSet.next()) {
+                    parkingLotInfos
+                            .add(mResultSet.getString("idx") + "^" + mResultSet.getString("name"));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return parkingLotInfos;
+        }
+
         public UserInformation getUserInfomation(String id) {
             final String sql = "SELECT * FROM tb_user WHERE id='" + id + "'";
             UserInformation ret = null;

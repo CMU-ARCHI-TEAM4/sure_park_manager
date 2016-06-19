@@ -7,9 +7,34 @@
         <link rel="stylesheet" href="style.css" type='text/css'>
     </head>
 
+<script type="text/javascript">
+function submitform() {
+    if(document.pf.onsubmit && !document.pf.onsubmit()) {
+        return;
+    }
+    document.pf.
+    document.pf.submit();
+}
+window.history.back();
+</script>
+
     <body>
         <h1 class="center">Parking facility status</h1>
-		<!-- template -->
+        <form name="pf" action="pf" method="post"> <table class="centerTable">
+	            <tr><td align="center"><a href="javascript:submitform()">
+	                   <img src="images/parking_icon.png" width="40%" height="50%" /></a>
+	                   </br>sdfsddfd</br>
+	                   dfdssd
+	               </td>
+	               <td align="center">
+                       <img src="images/parking_icon.png" width="45%" height="50%" /></br>
+                       sdfsddfd</br>
+                       dfdssd
+                       <input type="hidden" name="pf_name" value="Norway">
+                   </td>
+	            </tr>
+	        </table>
+	    </form>
     </body>
 
 </html>

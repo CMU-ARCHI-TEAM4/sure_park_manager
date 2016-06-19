@@ -3,7 +3,6 @@ package com.lge.sureparkmanager.utils;
 import java.util.ArrayList;
 
 public class Utils {
-
     public static String getNextControllerName(String curName) {
         final char[] curNameCh = curName.toCharArray();
         final int len = curNameCh.length;
@@ -40,5 +39,9 @@ public class Utils {
         }
 
         return parkingLotNumList;
+    }
+
+    public static String getParkingLotName(String pfn, String parkingLotIdx) {
+        return pfn + String.format("%05d", Integer.parseInt(parkingLotIdx));
     }
 }

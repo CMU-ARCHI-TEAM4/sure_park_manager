@@ -154,4 +154,17 @@ input[type=radio]:checked {
     background-size: 28px 28px;
 }
 .center { text-align: center; }
-.centerTable { margin: 0px auto; }
+
+.centerTable {
+	margin: 0px auto;
+	border-color: white;
+}
+.parking_facility_detail_table {
+	margin: 0px auto;
+    border-color: white;
+}
+.parking_facility_detail_table td {
+    text-align: center;
+    width: 100px;
+    height: 200px;
+}

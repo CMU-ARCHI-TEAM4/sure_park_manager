@@ -40,4 +40,31 @@ public class Html {
             }
         }
     }
+
+    /*
+     * @param formName
+     */
+    public static String getJsSubmitForm(String formName) {
+        String html = "<script type=\"text/javascript\">function submitform(arg) {";
+        html += "if(document." + formName + ".onsubmit && !document." + formName + ".onsubmit()) {";
+        html += "return; }";
+        html += "document.getElementById('" + formName + "_h').value=arg;";
+        html += "document." + formName + ".submit(); } </script>";
+        return html;
+    }
+
+    public static void executeJsGoBack(HttpServletResponse response) {
+        response.setContentType("text/html; charset=euc-kr");
+        PrintWriter out = null;
+        try {
+            out = response.getWriter();
+            out.write("<script type=\"text/javascript\">window.history.back();</script>");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+        }
+    }
 }

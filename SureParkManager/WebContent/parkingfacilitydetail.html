@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+<title>Sure-Park</title>
+<link rel="stylesheet" href="style.css" type='text/css'>
+</head>
+
+<script type="text/javascript">
+	var myVar = setInterval(getInfo, 2000);
+
+	function getInfo() {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', "https://localhost/s/infop?pfn=A", true);
+		xhr.send();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == 4 && xhr.status == 200) {
+				var data = xhr.responseText.split(" ");
+				entry_gate = data[0];
+				exit_gate = data[1];
+				parkinglot_num = data[2];
+
+				var h;
+				if (entry_gate == 1) {
+					h = "Entry Gate:<font color='red'>close</font>";
+				} else {
+					h = "Entry Gate:<font color='yellow'>open</font>";
+				}
+				document.getElementById("entry_gate").innerHTML = h;
+				if (exit_gate == 1) {
+					h = "Exit Gate:<font color='red'>close</font>";
+                } else {
+                    h = "Exit Gate:<font color='yellow'>open</font>";
+                }
+				document.getElementById("exit_gate").innerHTML = h;
+
+				var parkinglot_status = data[3].split("^");
+				for (i = 1; i <= parkinglot_num; i++) {
+					var e = parkinglot_status[i].split(":");
+					if (e[1] == 1) { // in
+						document.getElementById(e[0]).innerHTML = e[0] + "</br>full";
+					} else {
+						document.getElementById(e[0]).innerHTML = e[0] + "</br>empty";
+					}
+				}
+			}
+		}
+	}
+</script>
+
+<body>
+	<h1 class="center">Parking facility status</h1>
+
+    <table class="centerTable" width='500'>
+        <tr>
+            <td rowspan='2' align='center'>
+                <img src="images/pf_dave.png" width="30%" height="30%" />
+            </td>
+            <td width='200' id='entry_gate'>
+                Entry Gate:
+            </td>
+        </tr>
+        <tr>
+            <td width='200' id='exit_gate'>
+                Exit Gate:
+            </td>
+        </tr>
+    </table>
+	<table class="centerTable">
+		<tr>
+			<td valign="top">123</td>
+			<td>
+				<table class="parking_facility_detail_table" border="1">
+					<tr>
+						<td id='A00001'>1</td>
+						<td id='A00002'>2</td>
+						<td id='A00003'>3</td>
+						<td id='A00004'>4</td>
+					</tr>
+				</table>
+			</td>
+			<td id="entry_div"></br>entry</td>
+	</table>
+</body>
+
+</html>
