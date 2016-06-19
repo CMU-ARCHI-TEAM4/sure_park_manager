@@ -262,8 +262,7 @@ public class Reservation extends HttpServlet {
 		if (endTime != null && endDate != null) {
 			final String confirmID = makeConfirmationID(id, facility, startDate, startTime, endDate, endTime);
 			if (confirmID == null) {
-				// TODO; failed to reserve
-				response.sendRedirect("welcome.html");
+				response.sendRedirect("reservation_error.html");
 				out.close();
 				return;
 			}
