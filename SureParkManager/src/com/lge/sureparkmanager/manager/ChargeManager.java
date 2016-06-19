@@ -4,34 +4,45 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import com.lge.sureparkmanager.db.UserInformation;
 import com.lge.sureparkmanager.utils.Log;
 
 public class ChargeManager extends SystemManagerBase {
 
 	private static final String TAG = ChargeManager.class.getSimpleName();
 	private int PERHOUR = 0;
-	
+	private DataBaseManager dbm = (DataBaseManager)SystemManager.getInstance().getManager(
+	        SystemManager.DATABASE_MANAGER);
 	/**
-     * Initialize the manager.
-     */
-    protected void init() {
-        super.init();
-        
-        try {
-        	PERHOUR = ((ConfigurationManager)SystemManager.getInstance().getManager(SystemManager.CONFIGURATION_MANAGER)).getConfigtHourlyRate();
-        } catch(Exception e) {
-        	PERHOUR = 10;
-        }
-        
-    }
-    
+	 * Initialize the manager.
+	 */
+	protected void init() {
+		super.init();
+
+		try {
+			PERHOUR = ((ConfigurationManager) SystemManager.getInstance()
+					.getManager(SystemManager.CONFIGURATION_MANAGER)).getConfigtHourlyRate();
+		} catch (Exception e) {
+			PERHOUR = 10;
+		}
+
+	}
+
+	/**
+	 * calculate charge
+	 * 
+	 * @param startDateTime
+	 * @param endDateTime
+	 * @return amount
+	 */
 	public long calculateCharge(String startDateTime, String endDateTime) {
 		try {
-			
+
 			if (PERHOUR == 0) {
 				init();
 			}
-			
+
 			DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			Date startDate = format.parse(startDateTime);
 			Date endDate = format.parse(endDateTime);
@@ -44,42 +55,93 @@ public class ChargeManager extends SystemManagerBase {
 			}
 
 			long min = period / (1000 * 60);
-			long hour = (min / 60) + (min % 60 > 30 ? 1: 0);
+			long hour = (min / 60) + (min % 60 > 30 ? 1 : 0);
 			long payment = hour * PERHOUR;
-			
-			Log.d(TAG, "parking min : " + min + " hour : " + hour + "payment : " + payment);
-			
+
+			Log.d(TAG, "parking min : " + min + " hour : " + hour + " payment : " + payment);
+
 			return payment;
 
 		} catch (ParseException e) {
 
-			e.printStackTrace();
+			Log.e(TAG, "Parsing error, date & time should be formated as YYYY-MM-dd HH:MM");
+
+			//e.printStackTrace();
 		}
 
 		return 0;
 	}
 
-	public void checkout(String cardNum, String cardValid, long amount) {
-		System.err.println("***********************************************");
-		System.err.println("***********************************************");
+	/**
+	 * request charging fee to credit card system
+	 * 
+	 * @param cardNum
+	 * @param cardValid
+	 * @param amount
+	 */
+	public void requestCharge(String cardNum, String cardValid, long amount) {
+
 		StringBuilder message = new StringBuilder();
-		message.append("CHARGE FOR PARKING");
+		message.append("\n\n***********************************************\n");
+		message.append("***********************************************\n");
+		message.append("REQUEST TO CARD PAYMENT SYSTEM\n");
+		message.append("CHARGE FOR PARKING\n");
 		message.append("CARD NUMBER :");
-		message.append(cardNum);
+		message.append(cardNum +"\n");
 		message.append("CARD VALIDATION : ");
-		message.append(cardValid);
+		message.append(cardValid+"\n");
 		message.append("TOTAL AMOUNT : ");
-		message.append(amount);
+		message.append(amount+"\n");
+		message.append("***********************************************\n");
+		message.append("***********************************************\n\n");
 		Log.d(TAG, message.toString());
-		System.err.println("* REQUEST TO CARD PAYMENT SYSTEM ");
+
 		System.err.println(message);
-		System.err.println("***********************************************");
-		System.err.println("***********************************************");
 	}
 
 	@Override
 	void reportDeath() {
 		// TODO Auto-generated method stub
+	}
 
+	/**
+	 * get current time for DB
+	 * 
+	 * @return
+	 */
+	private String getCurrentTime() {
+
+		Date date = new Date();
+
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		String currentDate = dateFormat.format(date);
+		
+		return currentDate;
+	}
+
+	/**
+	 * check in to parking facility
+	 * @param facility
+	 * @param parkingLot
+	 */
+	public void checkIn(String facility, String parkingLot) {
+		
+		String current = getCurrentTime();
+		dbm.getQueryWrapper().setStartTimeToHistoyTable(current, facility, parkingLot);
+	}
+
+	/**
+	 * check out from parking facility
+	 * @param userID
+	 * @param facility
+	 * @param parkingLot
+	 */
+	public void checkOut(String userID, String facility, String parkingLot) {
+		
+		String current = getCurrentTime();
+		final long fee = dbm.getQueryWrapper().setEndTimeToHistoyTable(current, facility, parkingLot);
+
+		UserInformation userInfo = dbm.getQueryWrapper().getUserInfomation(userID);
+		requestCharge(userInfo.getCreditCardNumber(), userInfo.getCreditCardValidation(), fee);
 	}
 }

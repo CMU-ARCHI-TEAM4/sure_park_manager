@@ -631,8 +631,7 @@ public final class DataBaseManager extends SystemManagerBase {
         }
         
         public List<String> getListOfFacility() {
-        	
-        	//TODO; fix table name and column name
+
             final String sql = "SELECT name FROM tb_controller";
             ArrayList<String> ret = new ArrayList<String>();
             
@@ -662,5 +661,88 @@ public final class DataBaseManager extends SystemManagerBase {
             return ret;
         }
         
+        
+        /**
+         * insert history with start time
+         * @param startTime
+         * @param facility
+         * @param parkingLot
+         */
+        public void setStartTimeToHistoyTable(String startTime, String facility, String parkingLot) {
+
+            try {
+
+            	// find out tb_parkinglot_idx
+                String idx = String.format("%S%05d", facility, parkingLot);
+                Log.d(TAG, "find out idx from tb_parkinglot "  + idx);
+                String sqlParkingidx =  "SELECT idx FROM tb_parkinglot WHERE name='" + idx + "'";
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlParkingidx);
+                mResultSet.next();
+                
+                final String sql = "INSERT into tb_history (tb_parkinglot_idx, start_time) VALUES('"
+                        + mResultSet.getString("idx") + "', '" +startTime + "')";
+
+                mDataBaseConnectionManager.getStatement().executeUpdate(sql);
+                
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        
+        /**
+         * set end time into history table
+         * @param endTime
+         * @param facility
+         * @param parkingLot
+         * @return fee
+         */
+        public long setEndTimeToHistoyTable(String endTime, String facility, String parkingLot) {
+
+            try {
+
+            	// find out tb_parkinglot_idx
+                final String name = String.format("%S%05d", facility, parkingLot);
+                Log.d(TAG, "find out idx from tb_parkinglot "  + name);
+                final String sqlParkingidx =  "SELECT idx FROM tb_parkinglot WHERE name='" + name + "'";
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlParkingidx);
+                mResultSet.next();
+                final String idx = mResultSet.getString("idx");
+                
+                final String sqlStartTime = "SELECT start_time FROM tb_history WHERE idx='" + idx + "' AND end_time IS NULL";
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlStartTime);
+                mResultSet.next();
+                final String startTime = mResultSet.getString("start_time");
+                
+                final long fee = ((ChargeManager)SystemManager.getInstance().getManager(SystemManager.CHARGE_MANAGER)).calculateCharge(startTime, endTime);
+                //UPDATE tb_history SET end_time='2016-10-11 11:11'WHERE idx='1' AND end_time IS NULL
+                final String sql = "UPDATE tb_history SET end_time='"
+                        + endTime + "' fee='"+ fee+ "' WHERE idx='" + idx + "' AND end_time IS NULL" ;
+                
+                mDataBaseConnectionManager.getStatement().executeUpdate(sql);
+                
+                return fee;
+                
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            
+            return 0L;
+        }
     }
 }

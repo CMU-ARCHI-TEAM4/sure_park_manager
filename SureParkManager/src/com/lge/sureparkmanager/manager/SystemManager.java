@@ -13,6 +13,7 @@ public final class SystemManager {
     public static final int COMMAND_MANAGER = 4;
     public static final int INFO_PROVIDER_MANAGER = 5;
     public static final int ALIVE_CHECKER_MANAGER = 6;
+    public static final int CHARGE_MANAGER = 7;
 
     private static SystemManager mInstance;
 
@@ -70,6 +71,12 @@ public final class SystemManager {
             AliveCheckerManager aliveCheckerManager = new AliveCheckerManager();
             aliveCheckerManager.init();
             mManagers.put(ALIVE_CHECKER_MANAGER, aliveCheckerManager);
+            
+            // Initialize ChargeManager.
+            ChargeManager chargeManager = new ChargeManager();
+            chargeManager.init();
+            mManagers.put(CHARGE_MANAGER, chargeManager);
+            
         } else {
             throw new RuntimeException("SystemManager has been initialized already");
         }
