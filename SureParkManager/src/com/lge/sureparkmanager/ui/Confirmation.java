@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.lge.sureparkmanager.utils.Html;
 import com.lge.sureparkmanager.utils.Log;
 
 /**
@@ -38,6 +39,12 @@ public class Confirmation extends HttpServlet {
 		String id = (String) session.getAttribute("userID");
 		String confirmID = (String) session.getAttribute("confirmID");
 		
+		if (id == null || id =="" ) {
+			Log.d(TAG, "Session dose not exist");
+			 Html.executeJsGoBack(response);
+			 return;
+		}
+		
 		Log.d(TAG, "userID " + id);
 		Log.d(TAG, "confirmID " + confirmID);
 		
@@ -62,6 +69,16 @@ public class Confirmation extends HttpServlet {
 		out.println("<td align=\"center\">ID</td>");
 		out.println("<td><input type=\"text\" name=\"first_name\" value=" + confirmID +" "
 				+ "readonly/></td>");
+		
+		
+		String html="";
+		html += "<tr ><td colspan='2' align='center'>";
+        html += "<a href='reservation'><input type='button' value='More Reservation'/></a>";
+        html += "<a href='logout'><input type='button' value='Logout'/></a>";
+        html += "</td></tr></table></form>";
+        
+        out.println(html);
+        
 		out.println("</tr>");
 		
 		out.println("</table>");

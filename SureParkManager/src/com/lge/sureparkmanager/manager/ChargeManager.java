@@ -55,7 +55,7 @@ public class ChargeManager extends SystemManagerBase {
 			}
 
 			long min = period / (1000 * 60);
-			long hour = (min / 60) + (min % 60 > 30 ? 1 : 0);
+			long hour = (min / 60) + (min % 60 >= 30 ? 1 : 0);
 			long payment = hour * PERHOUR;
 
 			Log.d(TAG, "parking min : " + min + " hour : " + hour + " payment : " + payment);

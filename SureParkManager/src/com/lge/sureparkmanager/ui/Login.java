@@ -46,6 +46,7 @@ public class Login extends HttpServlet {
                 response.sendRedirect("statistics");
             } else {
                 session.setMaxInactiveInterval(WebSession.SESSION_TIMEOUT);
+                response.sendRedirect("reservation");
             }
         } else {
             PrintWriter printWriter = null;

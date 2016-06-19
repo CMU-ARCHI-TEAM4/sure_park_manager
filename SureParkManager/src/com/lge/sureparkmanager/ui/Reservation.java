@@ -18,6 +18,7 @@ import javax.servlet.http.HttpSession;
 import com.lge.sureparkmanager.db.UserInformation;
 import com.lge.sureparkmanager.manager.DataBaseManager;
 import com.lge.sureparkmanager.manager.SystemManager;
+import com.lge.sureparkmanager.utils.Html;
 import com.lge.sureparkmanager.utils.Log;
 
 /**
@@ -122,9 +123,18 @@ public class Reservation extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
+		
 		HttpSession session = request.getSession();
 		String id = (String) session.getAttribute("userID");
 		Log.d(TAG, "userID " + id);
+		
+		session.removeAttribute("confirmID");
+		
+		if (id == null || id =="" ) {
+			Log.d(TAG, "Session dose not exist");
+			 Html.executeJsGoBack(response);
+			 return;
+		}
 		
 		getDateBoudary();
 		getDataFromDB(id);
@@ -220,7 +230,16 @@ public class Reservation extends HttpServlet {
 				+ "readonly/></td>");
 		out.println("</tr>");
 		                
-		out.println("<tr ><td colspan=\"2\" align=\"center\"><input type=\"submit\" value=\"Reservation\"/></td></tr>");
+		String html="";
+		html += "<tr ><td colspan='2' align='center'>";
+        html += "<input type='submit' value='Reservation'/></a>";
+        html += "<a href='logout'><input type='button' value='Cancle'/></a>";
+        html += "</td></tr></table></form>";
+        
+        out.println(html);
+        
+		//out.println("<tr ><td colspan=\"2\" align=\"center\"><input type=\"submit\" value=\"Reservation\"/></td></tr>");
+		//out.println("<a href='javascript:window.history.back();'><input type='button' value='Cancle'/></a>");
 		out.println("</table>");
 		out.println("</form>");
 		out.println("</body>");
