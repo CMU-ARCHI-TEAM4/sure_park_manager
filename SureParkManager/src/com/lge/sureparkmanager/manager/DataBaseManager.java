@@ -203,12 +203,6 @@ public final class DataBaseManager extends SystemManagerBase {
             return idx;
         }
 
-        public boolean existConfirmationId(String id) {
-            boolean ret = true;
-
-            return ret;
-        }
-
         public int getSocketPortNum() {
             return Integer.parseInt(mConfigurationValues[0]);
         }
@@ -256,7 +250,7 @@ public final class DataBaseManager extends SystemManagerBase {
                         nextControllerName = Utils.getNextControllerName(name);
                         final String inSql = "INSERT INTO tb_controller(mac_addr, name, parkinglot_num) "
                                 + "VALUES('" + mac + "','" + nextControllerName + "','"
-                                + parkingLotNum + ")";
+                                + parkingLotNum + "')";
                         mDataBaseConnectionManager.getStatement().executeUpdate(inSql);
                     } else {
                         Log.d(TAG, "already existing controller");
@@ -323,7 +317,8 @@ public final class DataBaseManager extends SystemManagerBase {
 
         public String getParkStatusInfo(String pfn) {
             String rsp = "";
-            final String sql = "SELECT name, status FROM tb_parkinglot WHERE name LIKE '" + pfn + "%'";
+            final String sql = "SELECT name, status FROM tb_parkinglot WHERE name LIKE '" + pfn
+                    + "%'";
             try {
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
                 while (mResultSet.next()) {
@@ -350,9 +345,9 @@ public final class DataBaseManager extends SystemManagerBase {
             final String parkingFacilityName = getParkingFacilityName(mac);
             final String parkingLotName = Utils.getParkingLotName(parkingFacilityName,
                     parkingLotNum);
-            //final int parkingLotIdx = getParkingLotIdx(parkingLotName);
-            final String sql = "UPDATE tb_parkinglot SET status='" + status
-                    + "' WHERE name='" + parkingLotName + "'";
+            // final int parkingLotIdx = getParkingLotIdx(parkingLotName);
+            final String sql = "UPDATE tb_parkinglot SET status='" + status + "' WHERE name='"
+                    + parkingLotName + "'";
             try {
                 mDataBaseConnectionManager.getStatement().executeUpdate(sql);
             } catch (SQLException e) {
@@ -417,6 +412,31 @@ public final class DataBaseManager extends SystemManagerBase {
             return parkingLotInfos;
         }
 
+        public boolean isValidConfirmationId(String cfId) {
+            final String sql = "SELECT idx FROM tb_reservation WHERE confirm_id='" +
+                    cfId + "' AND start_time >= '2016-06-19 17:37'"; //+ Utils.getCurrentDateTime() + "'";
+            boolean ret = false;
+            try {
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
+                mResultSet.last();
+                if (mResultSet.getRow() == 1) {
+                    ret = true;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return ret;
+        }
+
         public UserInformation getUserInfomation(String id) {
             final String sql = "SELECT * FROM tb_user WHERE id='" + id + "'";
             UserInformation ret = null;
@@ -451,15 +471,16 @@ public final class DataBaseManager extends SystemManagerBase {
 
             return ret;
         }
-        
+
         /**
          * get the total number of lots in specific facility.
+         * 
          * @param facility
          * @return
          */
         public int getTotalNumberOfLots(String facility) {
-        	
-        	// find out total number of lots
+
+            // find out total number of lots
             final String sql = "SELECT name, parkinglot_num FROM tb_controller";
             try {
 
@@ -469,12 +490,12 @@ public final class DataBaseManager extends SystemManagerBase {
                     name = mResultSet.getString("name");
                     Log.d(TAG, "facility " + name);
                     if (facility.equalsIgnoreCase(name)) {
-                    	final int ret = mResultSet.getInt("parkinglot_num");
-                    	Log.d(TAG, "the number of lots : " + ret);
-                    	return ret;
+                        final int ret = mResultSet.getInt("parkinglot_num");
+                        Log.d(TAG, "the number of lots : " + ret);
+                        return ret;
                     }
                 }
-                
+
             } catch (SQLException e) {
                 e.printStackTrace();
             } finally {
@@ -493,6 +514,7 @@ public final class DataBaseManager extends SystemManagerBase {
 
         /**
          * add reservation information on DB
+         * 
          * @param id
          * @param parkingFacility
          * @param startTime

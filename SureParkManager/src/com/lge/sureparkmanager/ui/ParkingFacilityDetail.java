@@ -53,8 +53,8 @@ public class ParkingFacilityDetail extends HttpServlet {
             mMacAddr = split[2];
 
             printWriter.write(Html.getHtmlHeader());
-            printWriter.write(getJsInfoProviderRequest());
             printWriter.write(getParkingFacilityDetailInfoHtml());
+            printWriter.write(getJsInfoProviderRequest());
             printWriter.write(Html.getHtmlFooter());
         } catch (Exception e) {
             e.printStackTrace();
@@ -75,12 +75,17 @@ public class ParkingFacilityDetail extends HttpServlet {
                 .getParkingLotInfo(mParkingFacilityName);
         String html = "<h1 class=\"center\">Parking facility - " + mParkingFacilityName + "</h1>";
 
+        html += "<form action='ccf' name='ccf' method='post'>";
+        html += "<input type='hidden' name='pf_h' value='" + mParkingFacilityName +
+                "^" + mParkingLotNum + "^" + mMacAddr + "'/></form>";
         html += "<table class='centerTable' width='500'><tr>";
-        html += "<td rowspan='3' align='center'>";
-        html += "<img src='images/pf_dave.png' width='30%' height='30%' />";
+        html += "<td rowspan='4' align='center'>";
+        html += "<a href='pf'><img src='images/pf_dave.png' width='30%' height='30%' /></a>";
         html += "</td><td width='200' id='alive'>Device:";
-        html += "</td></tr><tr><td width='200' id='entry_gate'>Entry Gate:";
-        html += "</td></tr><tr><td width='200' id='exit_gate'>Exit Gate:";
+        html += "</td></tr><tr><td id='entry_gate'>Entry Gate:";
+        html += "</td></tr><tr><td id='exit_gate'>Exit Gate:";
+        html += "</td></tr><tr><td id='exit_gate'>Confirm: ";
+        html += "<a href='javascript:document.ccf.submit();'>CHECK</a>";
         html += "</td></tr></table>";
 
         html += "<table class=\"parking_facility_detail_table\" border=\"1\">";
@@ -101,19 +106,21 @@ public class ParkingFacilityDetail extends HttpServlet {
     private String getJsInfoProviderRequest() {
         String html = "";
 
-        html += "<script type=\"text/javascript\">";
+        html += "<script type='text/javascript'>";
         html += "var myVar = setInterval(getInfo, 1000);";
         html += "function getInfo() {";
         html += "var xhr = new XMLHttpRequest();";
-        html += "xhr.open('GET', \"/s/infop?pfn=" + mParkingFacilityName + "&mac=" + mMacAddr
-                + "\", true);";
+        html += "xhr.open('GET', '/s/infop?pfn=" + mParkingFacilityName + "&mac=" + mMacAddr
+                + "', true);";
         html += "xhr.send();";
         html += "xhr.onreadystatechange = function() {";
         html += "if (xhr.readyState == 4 && xhr.status == 200) {";
         html += "var data = xhr.responseText.split(\" \");";
         html += "alive = data[0];entry_gate = data[1];exit_gate = data[2];parkinglot_num = data[3];";
-        html += "var parkinglot_status = data[4].split(\"^\");";
+        html += "isArrivedEntryGate = data[4];";
+        html += "var parkinglot_status = data[5].split(\"^\");";
         html += "var h;";
+        html += "if (isArrivedEntryGate == 1) { document.ccf.submit(); }";
         html += "if (alive == 1) {";
         html += "h = \"Device: <font color='yellow'>OK</font>\"";
         html += "} else {h = \"Device: <font color='red'>DEAD</font>\";}";

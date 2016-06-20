@@ -384,4 +384,12 @@
 		<servlet-name>statistics</servlet-name>
 		<url-pattern>/statistics</url-pattern>
 	</servlet-mapping>
+	<servlet>
+		<servlet-name>ccf</servlet-name>
+		<servlet-class>com.lge.sureparkmanager.ui.CheckConfirmation</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ccf</servlet-name>
+		<url-pattern>/ccf</url-pattern>
+	</servlet-mapping>
 </web-app>

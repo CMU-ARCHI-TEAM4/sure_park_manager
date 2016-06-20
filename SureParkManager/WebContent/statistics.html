@@ -1,14 +1,38 @@
 <!DOCTYPE html>
 <html>
 
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
-        <title>Sure-Park</title>
-        <link rel="stylesheet" href="style.css" type="text/css">
-    </head>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+<title>Sure-Park</title>
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="stylesheet" href="fcf/Contents/Style.css" type="text/css" />
+<script src="fcf/JSClass/FusionCharts.js"></script>
+</head>
 
-    <body>
-        <h1 class="center">Statistics</h1>
-    </body>
-
+<body>
+	<table width="98%" border="0" cellspacing="0" cellpadding="3"
+		align="center">
+		<tr>
+			<td valign="top" class="text" align="center">
+				<div id="chartdiv" align="center">FusionCharts.</div> <script
+					type="text/javascript">
+					var chart = new FusionCharts("fcf/Charts/FCF_MSLine.swf",
+							"ChartId", "600", "350");
+					chart.setDataURL("MSLine.xml");
+					chart.render("chartdiv");
+				</script>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top" class="text" align="center">&nbsp;</td>
+		</tr>
+		<tr>
+			<td valign="top" class="text" align="center"><a
+				href="MSLine.xml" target="_blank"><img
+					src="fcf/Contents/Images/BtnViewXML.gif"
+					alt="View XML for the above chart" width="75" height="25"
+					border="0" /></a></td>
+		</tr>
+	</table>
+</body>
 </html>

@@ -124,12 +124,17 @@ public class Login extends HttpServlet {
 		String captcha = makeCaptcha();
 		
 		String html = "<form action='login' name='login' method='post'>";
-		html += "<table class='centerTable'>";
-		html += "<tr ><td colspan='2' align='center'><h1>" + title + "</h1></td></tr>";
-		html += "<tr><td align='center'>ID</td>";
-		html += "<td><input type='text' name='id' id='id' /></td>";
-		html += "</tr><tr><td align='center'>PW</td>";
-		html += "<td><input type='password' name='passwd' id='passwd' /></td></tr>";
+        html += "<table class='centerTable' width='500'>";
+        html += "<tr ><td colspan='2' align='center'>";
+        if (title.contains("Administrator")) {
+            html += "<img src='images/lattanze.jpg' />";
+        } else {
+            html += "<img src='images/hulk_icon.png' width='400' height='200' />";
+        }
+        html += "</td></tr><tr><td align='center'>ID</td>";
+        html += "<td><input type='text' name='id' id='id' size='20' /></td>";
+        html += "</tr><tr><td align='center'>PW</td>";
+        html += "<td><input type='password' name='passwd' id='passwd' size='20' /></td></tr>";
 		html += "<tr><td><img alt='lg twins' src='"+ captcha +"' /></td>";
 		html += "<td><input type='text' name='captcha' id='captcha' /></tr>";
 		html += "<tr ><td colspan='2' align='center'>";
