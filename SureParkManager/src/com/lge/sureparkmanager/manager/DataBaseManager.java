@@ -673,17 +673,19 @@ public final class DataBaseManager extends SystemManagerBase {
             try {
 
             	// find out tb_parkinglot_idx
-                String idx = String.format("%S%05d", facility, parkingLot);
+                String idx = String.format("%S%05d", facility, Integer.parseInt(parkingLot));
                 Log.d(TAG, "find out idx from tb_parkinglot "  + idx);
                 String sqlParkingidx =  "SELECT idx FROM tb_parkinglot WHERE name='" + idx + "'";
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlParkingidx);
                 mResultSet.next();
+                final String parkinglot_idx = mResultSet.getString("idx");
                 
                 final String sql = "INSERT into tb_history (tb_parkinglot_idx, start_time) VALUES('"
-                        + mResultSet.getString("idx") + "', '" +startTime + "')";
+                        + parkinglot_idx + "', '" +startTime + "')";
 
                 mDataBaseConnectionManager.getStatement().executeUpdate(sql);
                 
+                Log.d(TAG, "insert new history "  + parkinglot_idx +" "+ startTime);
             } catch (SQLException e) {
                 e.printStackTrace();
             } finally {
@@ -709,14 +711,14 @@ public final class DataBaseManager extends SystemManagerBase {
             try {
 
             	// find out tb_parkinglot_idx
-                final String name = String.format("%S%05d", facility, parkingLot);
+                final String name = String.format("%S%05d", facility, Integer.parseInt(parkingLot));
                 Log.d(TAG, "find out idx from tb_parkinglot "  + name);
                 final String sqlParkingidx =  "SELECT idx FROM tb_parkinglot WHERE name='" + name + "'";
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlParkingidx);
                 mResultSet.next();
                 final String idx = mResultSet.getString("idx");
                 
-                final String sqlStartTime = "SELECT start_time FROM tb_history WHERE idx='" + idx + "' AND end_time IS NULL";
+                final String sqlStartTime = "SELECT start_time FROM tb_history WHERE tb_parkinglot_idx='" + idx + "' AND end_time IS NULL";
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlStartTime);
                 mResultSet.next();
                 final String startTime = mResultSet.getString("start_time");
@@ -724,7 +726,7 @@ public final class DataBaseManager extends SystemManagerBase {
                 final long fee = ((ChargeManager)SystemManager.getInstance().getManager(SystemManager.CHARGE_MANAGER)).calculateCharge(startTime, endTime);
                 //UPDATE tb_history SET end_time='2016-10-11 11:11'WHERE idx='1' AND end_time IS NULL
                 final String sql = "UPDATE tb_history SET end_time='"
-                        + endTime + "' fee='"+ fee+ "' WHERE idx='" + idx + "' AND end_time IS NULL" ;
+                        + endTime + "', fee='"+ fee+ "' WHERE tb_parkinglot_idx='" + idx + "' AND end_time IS NULL" ;
                 
                 mDataBaseConnectionManager.getStatement().executeUpdate(sql);
                 

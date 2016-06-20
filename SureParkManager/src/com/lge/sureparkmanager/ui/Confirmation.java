@@ -38,11 +38,11 @@ public class Confirmation extends HttpServlet {
 		HttpSession session = request.getSession();
 		String id = (String) session.getAttribute("userID");
 		String confirmID = (String) session.getAttribute("confirmID");
-		
-		if (id == null || id =="" ) {
+
+		if (id == null || id == "" || confirmID == null || confirmID == "") {
 			Log.d(TAG, "Session dose not exist");
-			 Html.executeJsGoBack(response);
-			 return;
+			Html.executeJsGoBack(response);
+			return;
 		}
 		
 		Log.d(TAG, "userID " + id);

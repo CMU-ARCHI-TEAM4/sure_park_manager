@@ -1,8 +1,11 @@
 package com.lge.sureparkmanager.ui;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Base64;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -16,90 +19,134 @@ import com.lge.sureparkmanager.utils.Html;
 import com.lge.sureparkmanager.utils.Log;
 import com.lge.sureparkmanager.utils.WebSession;
 
+import nl.captcha.Captcha;
+import nl.captcha.backgrounds.GradiatedBackgroundProducer;
+
 @WebServlet("/login")
 public class Login extends HttpServlet {
-    private static final String TAG = Login.class.getSimpleName();
-    private static final long serialVersionUID = 1L;
+	private static final String TAG = Login.class.getSimpleName();
+	private static final long serialVersionUID = 1L;
 
-    public Login() {
-        super();
-        Log.d(TAG, "init");
-    }
+	private String captchaAnswer = "";
+	
+	public Login() {
+		super();
+		Log.d(TAG, "init");
+	}
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        final StringBuffer requestUrl = request.getRequestURL();
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		
+		
+		final StringBuffer requestUrl = request.getRequestURL();
 
-        request.setCharacterEncoding("euc-kr");
-        DataBaseManager dbm = (DataBaseManager) SystemManager.getInstance().getManager(
-                SystemManager.DATABASE_MANAGER);
+		request.setCharacterEncoding("euc-kr");
+		DataBaseManager dbm = (DataBaseManager) SystemManager.getInstance().getManager(SystemManager.DATABASE_MANAGER);
 
-        String id = request.getParameter("id");
-        String pw = request.getParameter("passwd");
+		String id = request.getParameter("id");
+		String pw = request.getParameter("passwd");
+		String captchaUser = request.getParameter("captcha");
+		
+		if (captchaAnswer.equals(captchaUser)) {
+			Log.d(TAG, "Confirmed with captcha " + captchaAnswer);
+		}
+		
+		if (dbm != null && dbm.getQueryWrapper().isLoginOk(id, pw) && captchaAnswer.equals(captchaUser)) {
+			HttpSession session = request.getSession();
+			session.setAttribute(WebSession.SESSION_USERID, id);
+			if ("attendant".equals(id)) {
+				response.sendRedirect("pf");
+			} else if ("admin".equals(id)) {
+				response.sendRedirect("statistics");
+			} else {
+				session.setMaxInactiveInterval(WebSession.SESSION_TIMEOUT);
+				response.sendRedirect("reservation");
+			}
+		} else {
+			PrintWriter printWriter = null;
+			try {
+				printWriter = response.getWriter();
+				printWriter.write(Html.getHtmlHeader());
+				printWriter.write(getJsInputCheckSubmit("login"));
 
-        if (dbm.getQueryWrapper().isLoginOk(id, pw)) {
-            HttpSession session = request.getSession();
-            session.setAttribute(WebSession.SESSION_USERID, id);
-            if ("attendant".equals(id)) {
-                response.sendRedirect("pf");
-            } else if ("admin".equals(id)) {
-                response.sendRedirect("statistics");
-            } else {
-                session.setMaxInactiveInterval(WebSession.SESSION_TIMEOUT);
-                response.sendRedirect("reservation");
-            }
-        } else {
-            PrintWriter printWriter = null;
-            try {
-                printWriter = response.getWriter();
-                printWriter.write(Html.getHtmlHeader());
-                printWriter.write(getJsInputCheckSubmit("login"));
+				if (requestUrl.toString().contains("ad_login")) {
+					printWriter.write(getLoginHtml("Login for Administrator"));
+				} else {
+					printWriter.write(getLoginHtml("Login for Driver"));
+				}
+				
+				printWriter.write(Html.getHtmlFooter());
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				if (printWriter != null) {
+					printWriter.close();
+				}
+			}
+		}
+		
+	}
 
-                if (requestUrl.toString().contains("ad_login")) {
-                    printWriter.write(getLoginHtml("Login for Administrator"));
-                } else {
-                    printWriter.write(getLoginHtml("Login for Driver"));
-                }
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		doGet(request, response);
+	}
+	
+	private String makeCaptcha() {
+		
+		Captcha captcha = new Captcha.Builder(120, 50)
+				 .addText() 
+				 .addBackground(new GradiatedBackgroundProducer())
+				 .addNoise()
+				 //.gimp(new DropShadowGimpyRenderer())
+				 .addBorder()
+				 .build();
+		
+		
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		
+		try {
+			ImageIO.write(captcha.getImage(), "PNG", out);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		byte[] bytes = out.toByteArray();
 
-                printWriter.write(Html.getHtmlFooter());
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (printWriter != null) {
-                    printWriter.close();
-                }
-            }
-        }
-    }
+		byte[] base64bytes = Base64.getEncoder().encode(bytes);
+		String src = "data:image/png;base64," + new String(base64bytes);
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        doGet(request, response);
-    }
+		captchaAnswer = captcha.getAnswer();
+		return src;
+	}
 
-    private String getLoginHtml(String title) {
-        String html = "<form action='login' name='login' method='post'>";
-        html += "<table class='centerTable'>";
-        html += "<tr ><td colspan='2' align='center'><h1>" + title + "</h1></td></tr>";
-        html += "<tr><td align='center'>ID</td>";
-        html += "<td><input type='text' name='id' id='id' /></td>";
-        html += "</tr><tr><td align='center'>PW</td>";
-        html += "<td><input type='password' name='passwd' id='passwd' /></td></tr>";
-        html += "<tr ><td colspan='2' align='center'>";
-        html += "<a href='javascript:submitform();'><input type='button' value='Login'/></a>";
-        html += "<a href='javascript:window.history.back();'><input type='button' value='Cancle'/></a>";
-        html += "</td></tr></table></form>";
+	private String getLoginHtml(String title) {
+		
+		String captcha = makeCaptcha();
+		
+		String html = "<form action='login' name='login' method='post'>";
+		html += "<table class='centerTable'>";
+		html += "<tr ><td colspan='2' align='center'><h1>" + title + "</h1></td></tr>";
+		html += "<tr><td align='center'>ID</td>";
+		html += "<td><input type='text' name='id' id='id' /></td>";
+		html += "</tr><tr><td align='center'>PW</td>";
+		html += "<td><input type='password' name='passwd' id='passwd' /></td></tr>";
+		html += "<tr><td><img alt='lg twins' src='"+ captcha +"' /></td>";
+		html += "<td><input type='text' name='captcha' id='captcha' /></tr>";
+		html += "<tr ><td colspan='2' align='center'>";
+		html += "<a href='javascript:submitform();'><input type='button' value='Login'/></a>";
+		html += "<a href='javascript:window.history.back();'><input type='button' value='Cancle'/></a>";
+		html += "</td></tr></table></form>";
 
-        return html;
-    }
+		return html;
+	}
 
-    private String getJsInputCheckSubmit(String formName) {
-        String html = "<script type='text/javascript'>function submitform() {";
-        html += "if(document." + formName + ".onsubmit && !document." + formName + ".onsubmit()) {";
-        html += "return; }";
-        html += "if(document.getElementById('id').value == '') { alert('Please input id.'); return; }";
-        html += "if(document.getElementById('passwd').value == '') { alert('Please input password.'); return; }";
-        html += "document." + formName + ".submit(); } </script>";
-        return html;
-    }
+	private String getJsInputCheckSubmit(String formName) {
+		String html = "<script type='text/javascript'>function submitform() {";
+		html += "if(document." + formName + ".onsubmit && !document." + formName + ".onsubmit()) {";
+		html += "return; }";
+		html += "if(document.getElementById('id').value == '') { alert('Please input id.'); return; }";
+		html += "if(document.getElementById('passwd').value == '') { alert('Please input password.'); return; }";
+		html += "document." + formName + ".submit(); } </script>";
+		return html;
+	}
 }

@@ -3,6 +3,7 @@ package com.lge.sureparkmanager.ui;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -40,6 +41,7 @@ public class Reservation extends HttpServlet {
 	private String maxDate = null; // 3 hours later
 	private String currentTime = null;
 	private String maxTime = null;
+	private String currentTimeAfterOneHour = null;
 	
 	private DataBaseManager dbm = (DataBaseManager)SystemManager.getInstance().getManager(
 	        SystemManager.DATABASE_MANAGER);
@@ -116,6 +118,29 @@ public class Reservation extends HttpServlet {
 		currentTime = dateFormat.format(date);
 		
 		maxTime = dateFormat.format(tomorrow);
+		
+		c.setTime(date); 
+		c.add(Calendar.HOUR_OF_DAY, 1);
+		Date afterOne = c.getTime();
+		currentTimeAfterOneHour = dateFormat.format(afterOne);
+	}
+	
+	/**
+	 * convert string to date
+	 * @param date it should be "yyyy-MM-dd HH:mm"
+	 * @return
+	 */
+	private Date stringToDate(String str) {
+		
+		DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		Date date = null;
+		try {
+			date = format.parse(str);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return date;
 	}
 
 	/**
@@ -206,7 +231,7 @@ public class Reservation extends HttpServlet {
 		out.println("</tr>");
 		out.println("<tr>");
 		out.println("<td align=\"center\">End Time</td>");
-		out.println("<td><input type=\"time\" name=\"end_time\" "  + "value="+ currentTime + " "
+		out.println("<td><input type=\"time\" name=\"end_time\" "  + "value="+ currentTimeAfterOneHour + " "
 				+ "/></td>");
 		out.println("</tr>");
 		out.println("<tr>");
@@ -260,9 +285,16 @@ public class Reservation extends HttpServlet {
 		
 		// redirect to confirmation page
 		if (endTime != null && endDate != null) {
+			final Date start = stringToDate(startDate + " " + startTime);
+			final Date end = stringToDate(endDate + " " + endTime);
+			if (start.getTime() >= end.getTime()) {
+				response.sendRedirect("reservation_invalid_end_time.html");
+				out.close();
+				return;
+			}
 			final String confirmID = makeConfirmationID(id, facility, startDate, startTime, endDate, endTime);
 			if (confirmID == null) {
-				response.sendRedirect("reservation_error.html");
+				response.sendRedirect("reservation_fully_booked.html");
 				out.close();
 				return;
 			}

@@ -8,6 +8,11 @@ import java.util.Date;
 import com.lge.sureparkmanager.db.UserInformation;
 import com.lge.sureparkmanager.utils.Log;
 
+/**
+ * 
+ * @author hakjoo.lee
+ *
+ */
 public class ChargeManager extends SystemManagerBase {
 
 	private static final String TAG = ChargeManager.class.getSimpleName();
@@ -121,8 +126,9 @@ public class ChargeManager extends SystemManagerBase {
 
 	/**
 	 * check in to parking facility
-	 * @param facility
-	 * @param parkingLot
+	 * 
+	 * @param facility ex>"A"
+	 * @param parkingLot ex> "1"
 	 */
 	public void checkIn(String facility, String parkingLot) {
 		
@@ -132,9 +138,9 @@ public class ChargeManager extends SystemManagerBase {
 
 	/**
 	 * check out from parking facility
-	 * @param userID
-	 * @param facility
-	 * @param parkingLot
+	 * @param userID ex>"or4nge"
+	 * @param facility ex> "A"
+	 * @param parkingLot ex> "1"
 	 */
 	public void checkOut(String userID, String facility, String parkingLot) {
 		
