@@ -29,8 +29,8 @@ public final class NetworkManager extends SystemManagerBase {
 
         Log.d(TAG, "init");
 
-        mDataBaseManager = (DataBaseManager) SystemManager.getInstance().
-                getManager(SystemManager.DATABASE_MANAGER);
+        mDataBaseManager = (DataBaseManager) SystemManager.getInstance()
+                .getManager(SystemManager.DATABASE_MANAGER);
 
         WiFiSocket ws = new WiFiSocket(mDataBaseManager.getQueryWrapper().getSocketPortNum());
         ws.start();
@@ -52,9 +52,19 @@ public final class NetworkManager extends SystemManagerBase {
         }
     }
 
+    public void sendMessageToTarget(String macAddr, String msg) {
+        for (SocketObject s : mSocketObjects) {
+            if (Objects.equals(s.mMacAddr, macAddr)) {
+                s.mSender.sendMessageToClient(msg);
+                return;
+            }
+        }
+    }
+
     private void sendMessageToTarget(SocketObject so, String msg) {
         for (SocketObject s : mSocketObjects) {
             if (Objects.equals(s, so)) {
+                s.mMacAddr = msg.split(" ")[1];
                 s.mSender.sendMessageToClient(msg);
                 return;
             }
@@ -174,17 +184,12 @@ public final class NetworkManager extends SystemManagerBase {
             try {
                 while ((line = mIn.readLine()) != null) {
                     Log.d(TAG, line);
-                    SystemManager.getInstance().getCommandQueue().put(line);
-                    so = getSocketObject(this);
 
-                    // send echo.
-                    int echoFirstCmd = -1;
                     if (line.startsWith(String.valueOf(Commands.CMD_REQ))) {
-                        echoFirstCmd = Commands.CMD_RES;
-                    } else {
-                        echoFirstCmd = Commands.CMD_REQ;
+                        SystemManager.getInstance().getCommandQueue().put(line);
+                        so = getSocketObject(this);
+                        sendMessageToTarget(so, Commands.CMD_RES + line.substring(1));
                     }
-                    sendMessageToTarget(so, echoFirstCmd + line.substring(1));
                 }
             } catch (IOException e) {
                 Log.d(TAG, "connection terminated...");
@@ -212,6 +217,7 @@ public final class NetworkManager extends SystemManagerBase {
     private final class SocketObject {
         private Sender mSender;
         private Receiver mReceiver;
+        private String mMacAddr;
 
         public SocketObject(Sender sender, Receiver receiver) {
             mSender = sender;

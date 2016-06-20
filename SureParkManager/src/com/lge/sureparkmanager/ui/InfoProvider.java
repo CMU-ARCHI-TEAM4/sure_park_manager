@@ -11,17 +11,49 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.lge.sureparkmanager.manager.AliveCheckerManager;
+import com.lge.sureparkmanager.manager.CommandManager;
+import com.lge.sureparkmanager.manager.Commands;
 import com.lge.sureparkmanager.manager.SystemManager;
 import com.lge.sureparkmanager.utils.Html;
 import com.lge.sureparkmanager.utils.Log;
 
-public class InfoProvider extends HttpServlet {
+public class InfoProvider extends HttpServlet implements CommandManager.CommandListener {
     private static final String TAG = InfoProvider.class.getSimpleName();
     private static final long serialVersionUID = 1L;
+
+    private static final long ENTRY_GATE_TIME_OUT = 5000;
+
+    private CommandManager mCommandManager;
+    private boolean mIsArrivedEntryGate = false;
 
     public InfoProvider() {
         super();
         Log.d(TAG, "init");
+        mCommandManager = (CommandManager) SystemManager.getInstance()
+                .getManager(SystemManager.COMMAND_MANAGER);
+        mCommandManager.registerListener(this, Commands.CMD_ENTRY_SENSOR);
+    }
+
+    @Override
+    public void onCommand(String macAddr, int mainCmd, int subCmd) {
+        Log.d(TAG, "onCommand: " + macAddr + " " + mainCmd + " " + subCmd);
+        if (mainCmd == Commands.CMD_ENTRY_SENSOR) {
+            if (subCmd == Commands.CMD_ENTRY_SENSOR_DET) {
+                mIsArrivedEntryGate = true;
+                (new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(ENTRY_GATE_TIME_OUT);
+                        } catch (InterruptedException e) {
+                        }
+                        mIsArrivedEntryGate = false;
+                    }
+                }).start();
+            } else {
+                mIsArrivedEntryGate = false;
+            }
+        }
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -57,8 +89,9 @@ public class InfoProvider extends HttpServlet {
                 rspStr += " " + rs.getString("exit_gate");
                 rspStr += " " + rs.getString("parkinglot_num");
             }
+            rspStr += " " + (mIsArrivedEntryGate ? 1 : 0);
             rspStr += " " + pfs;
-            Log.d(TAG, rspStr);
+            //Log.d(TAG, rspStr);
             printWriter.write(rspStr);
         } catch (Exception e) {
             e.printStackTrace();
@@ -79,7 +112,5 @@ public class InfoProvider extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         doGet(request, response);
-        Log.d(TAG, "doPost");
     }
-
 }

@@ -1,8 +1,16 @@
 package com.lge.sureparkmanager.utils;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Random;
 
 public class Utils {
+    public static final String COMMAND_SEPARATOR = " ";
+    public static String DATE_FORMAT = "yyyy-MM-dd HH:mm";
+
     public static String getNextControllerName(String curName) {
         final char[] curNameCh = curName.toCharArray();
         final int len = curNameCh.length;
@@ -43,5 +51,50 @@ public class Utils {
 
     public static String getParkingLotName(String pfn, String parkingLotIdx) {
         return pfn + String.format("%05d", Integer.parseInt(parkingLotIdx));
+    }
+
+    public static String getCurrentDateTime() {
+        DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+        Date date = new Date();
+        return dateFormat.format(date);
+    }
+
+    public static String getFirstTime(String year, String month) {
+        String lastTime = String.format("%s-%02d-%s %s", year, Integer.parseInt(month),
+                "01", "00:00");
+        return lastTime;
+    }
+
+    public static String getLastTime(String year, String month) {
+        String lastTime = String.format("%s-%02d-%s %s", year, Integer.parseInt(month),
+                getLastDay(year, month), "24:00");
+        return lastTime;
+    }
+
+    public static String getLastDay(String year, String month) {
+        GregorianCalendar calendar = new GregorianCalendar();
+
+        int yearInt = Integer.parseInt(year);
+        int monthInt = Integer.parseInt(month) - 1;
+
+        calendar.set(yearInt, monthInt, 1);
+
+        int dayInt = calendar.getActualMaximum(GregorianCalendar.DAY_OF_MONTH);
+
+        return Integer.toString(dayInt);
+    }
+
+    public static String generateColor(Random r) {
+        final char[] hex = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
+                'e', 'f' };
+        char[] s = new char[7];
+        int n = r.nextInt(0x1000000);
+
+        s[0] = '#';
+        for (int i = 1; i < 7; i++) {
+            s[i] = hex[n & 0xf];
+            n >>= 4;
+        }
+        return new String(s);
     }
 }
