@@ -361,6 +361,8 @@ public final class DataBaseManager extends SystemManagerBase {
                     }
                 }
             }
+            Log.d(TAG, "getCurrentUserId: " + sql);
+            Log.d(TAG, "getCurrentUserId: " + userId);
             return userId;
         }
 
@@ -444,7 +446,7 @@ public final class DataBaseManager extends SystemManagerBase {
                 mResultSet.first();
                 ret = new String[] { mResultSet.getString("confirm_id"),
                         mResultSet.getString("start_time"), mResultSet.getString("end_time"),
-                        mResultSet.getString("name") };
+                        Utils.getParkingLotIdx(mResultSet.getString("name")) };
             } catch (SQLException e) {
                 e.printStackTrace();
             } finally {

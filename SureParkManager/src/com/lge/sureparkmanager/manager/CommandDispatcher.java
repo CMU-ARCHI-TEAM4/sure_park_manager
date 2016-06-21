@@ -37,12 +37,11 @@ public final class CommandDispatcher {
         final String parkingLotName = Utils.getParkingLotName(parkingFacilityName, parkingLotNum);
 
         if (st == Commands.CMD_PARKING_IN) {
-            Log.d(TAG, "mChargeManager: " + mChargeManager);
             mChargeManager.checkIn(confirmId, parkingFacilityName, parkingLotNum);
         } else {
             mChargeManager.checkOut(confirmId,
-                    mDataBaseManager.getQueryWrapper().getCurrentUserId(parkingLotNum), parkingFacilityName,
-                    parkingLotNum);
+                    mDataBaseManager.getQueryWrapper().getCurrentUserId(parkingLotName),
+                    parkingFacilityName, parkingLotNum);
         }
 
         mDataBaseManager.getQueryWrapper().setParkStatusInfo(status, parkingLotName, charging);

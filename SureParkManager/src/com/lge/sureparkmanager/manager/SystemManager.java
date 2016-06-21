@@ -42,6 +42,11 @@ public final class SystemManager {
             dataBaseManager.init();
             mManagers.put(DATABASE_MANAGER, dataBaseManager);
 
+            // Initialize ChargeManager.
+            ChargeManager chargeManager = new ChargeManager();
+            chargeManager.init();
+            mManagers.put(CHARGE_MANAGER, chargeManager);
+
             // Initialize CommandManager.
             CommandManager commandManager = new CommandManager();
             commandManager.init();
@@ -71,14 +76,8 @@ public final class SystemManager {
             AliveCheckerManager aliveCheckerManager = new AliveCheckerManager();
             aliveCheckerManager.init();
             mManagers.put(ALIVE_CHECKER_MANAGER, aliveCheckerManager);
-            
-            // Initialize ChargeManager.
-            ChargeManager chargeManager = new ChargeManager();
-            chargeManager.init();
-            mManagers.put(CHARGE_MANAGER, chargeManager);
-            
+
             mIsInit = true;
-            
         } else {
             throw new RuntimeException("SystemManager has been initialized already");
         }

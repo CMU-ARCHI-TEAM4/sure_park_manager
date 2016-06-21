@@ -91,7 +91,7 @@ public class InfoProvider extends HttpServlet implements CommandManager.CommandL
             }
             rspStr += " " + (mIsArrivedEntryGate ? 1 : 0);
             rspStr += " " + pfs;
-            Log.d(TAG, rspStr);
+            //Log.d(TAG, rspStr);
             printWriter.write(rspStr);
         } catch (Exception e) {
             e.printStackTrace();

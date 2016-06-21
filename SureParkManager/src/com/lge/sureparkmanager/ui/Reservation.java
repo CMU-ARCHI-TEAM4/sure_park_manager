@@ -221,7 +221,7 @@ public class Reservation extends HttpServlet {
 		out.println("</tr>");
 		out.println("<tr>");
 		out.println("<td align=\"center\">Start Time</td>");
-		out.println("<td><input type=\"time\" name=\"start_time\" " + "value="+ currentTime + " max="+ maxTime  +" "
+		out.println("<td><input type=\"time\" name=\"start_time\" " + "value="+ currentTime /*+ " max="+ maxTime*/  +" "
 				+ "/></td>");
 		out.println("</tr>");
 		out.println("<tr>");
