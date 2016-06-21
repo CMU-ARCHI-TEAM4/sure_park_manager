@@ -340,12 +340,31 @@ public final class DataBaseManager extends SystemManagerBase {
             return rsp;
         }
 
-        public void setParkStatusInfo(String mac, String status, String parkingLotNum,
-                String charging) {
-            final String parkingFacilityName = getParkingFacilityName(mac);
-            final String parkingLotName = Utils.getParkingLotName(parkingFacilityName,
-                    parkingLotNum);
-            // final int parkingLotIdx = getParkingLotIdx(parkingLotName);
+        public String getCurrentUserId(String parkingLotName) {
+            final String sql = "SELECT id FROM sure_park_system.tb_reservation "
+                    + "INNER JOIN tb_parkinglot ON tb_parkinglot_idx=tb_parkinglot.idx "
+                    + "INNER JOIN tb_user ON tb_user_idx=tb_user.idx " + "WHERE name='"
+                    + parkingLotName + "'";
+            String userId = null;
+            try {
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
+                mResultSet.first();
+                userId = mResultSet.getString("id");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return userId;
+        }
+
+        public void setParkStatusInfo(String status, String parkingLotName, String charging) {
             final String sql = "UPDATE tb_parkinglot SET status='" + status + "' WHERE name='"
                     + parkingLotName + "'";
             try {
@@ -412,16 +431,20 @@ public final class DataBaseManager extends SystemManagerBase {
             return parkingLotInfos;
         }
 
-        public boolean isValidConfirmationId(String cfId) {
-            final String sql = "SELECT idx FROM tb_reservation WHERE confirm_id='" +
-                    cfId + "' AND start_time >= '2016-06-19 17:37'"; //+ Utils.getCurrentDateTime() + "'";
-            boolean ret = false;
+        public String[] isValidConfirmationId(String cfId) {
+            String[] ret = null;
+            final String sql = "SELECT confirm_id, start_time, end_time, name FROM "
+                    + "tb_reservation INNER JOIN tb_parkinglot ON tb_parkinglot_idx = "
+                    + "tb_parkinglot.idx WHERE confirm_id='" + cfId
+                    + "' AND start_time >= '2016-06-19 17:37'"; // +
+                                                                // Utils.getCurrentDateTime()
+                                                                // + "'";
             try {
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
-                mResultSet.last();
-                if (mResultSet.getRow() == 1) {
-                    ret = true;
-                }
+                mResultSet.first();
+                ret = new String[] { mResultSet.getString("confirm_id"),
+                        mResultSet.getString("start_time"), mResultSet.getString("end_time"),
+                        mResultSet.getString("name") };
             } catch (SQLException e) {
                 e.printStackTrace();
             } finally {
@@ -452,8 +475,8 @@ public final class DataBaseManager extends SystemManagerBase {
                 final String _credit_card_num = mResultSet.getString("credit_card_num");
                 final String _credit_card_date = mResultSet.getString("credit_card_val_date");
 
-                ret = new UserInformation(id, _firstName, _lastName, _email, _phoneNumber, _credit_card_num,
-                        _credit_card_date);
+                ret = new UserInformation(id, _firstName, _lastName, _email, _phoneNumber,
+                        _credit_card_num, _credit_card_date);
 
                 Log.d(TAG, ret.getFristName() + " " + ret.getLastName());
 
@@ -521,7 +544,8 @@ public final class DataBaseManager extends SystemManagerBase {
          * @param endTime
          * @return
          */
-        public String addReservation(String id, String parkingFacility, String startTime, String endTime) {
+        public String addReservation(String id, String parkingFacility, String startTime,
+                String endTime) {
 
             final String sqlUser = "SELECT idx FROM tb_user WHERE id='" + id + "'";
             ResultSet resevedLotResult = null;

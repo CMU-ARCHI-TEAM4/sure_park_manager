@@ -20,8 +20,8 @@ public final class Commands {
     public static final int CMD_ENTRY_GATE_CLOSE = 1;
 
     public static final int CMD_PARKING = 6;
-    public static final int CMD_PARKING_IN = 0;
-    public static final int CMD_PARKING_OUT = 1;
+    public static final int CMD_PARKING_IN = 1;
+    public static final int CMD_PARKING_OUT = 0;
 
     public static final int CMD_EXIT_GATE = 7;
     public static final int CMD_EXIT_GATE_OPEN = 0;

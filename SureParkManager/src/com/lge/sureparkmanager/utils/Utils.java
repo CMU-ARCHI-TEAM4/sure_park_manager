@@ -53,6 +53,22 @@ public class Utils {
         return pfn + String.format("%05d", Integer.parseInt(parkingLotIdx));
     }
 
+    public static String getParkingLotIdx(String parkingLotName) {
+        if (parkingLotName == null) {
+            return null;
+        }
+
+        return parkingLotName.substring(parkingLotName.lastIndexOf("0") + 1);
+    }
+
+    public static String getParkingFacilityName(String parkingLotName) {
+        if (parkingLotName == null) {
+            return null;
+        }
+
+        return parkingLotName.substring(0, parkingLotName.indexOf("0"));
+    }
+
     public static String getCurrentDateTime() {
         DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
         Date date = new Date();
@@ -60,8 +76,8 @@ public class Utils {
     }
 
     public static String getFirstTime(String year, String month) {
-        String lastTime = String.format("%s-%02d-%s %s", year, Integer.parseInt(month),
-                "01", "00:00");
+        String lastTime = String.format("%s-%02d-%s %s", year, Integer.parseInt(month), "01",
+                "00:00");
         return lastTime;
     }
 

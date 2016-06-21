@@ -24,7 +24,8 @@ public class CheckConfirmation extends HttpServlet {
     private String mParkingFacilityName;
     private int mParkingLotNum;
     private String mMacAddr;
-    private String mConfirmationId = "";
+    private String[] mConfirmationInfo;
+    private String mConfirmationId;
 
     private boolean mConfirmedOk = false;
 
@@ -43,8 +44,11 @@ public class CheckConfirmation extends HttpServlet {
         mConfirmationId = request.getParameter("confirm_id");
 
         if (mConfirmationId != null && mConfirmationId.length() > 0) {
-            mConfirmedOk = mDataBaseManager.getQueryWrapper()
+            mConfirmationInfo = mDataBaseManager.getQueryWrapper()
                     .isValidConfirmationId(mConfirmationId);
+            if (mConfirmationInfo != null && mConfirmationInfo.length == 4) {
+                mConfirmedOk = true;
+            }
         }
 
         PrintWriter printWriter = null;
@@ -90,7 +94,7 @@ public class CheckConfirmation extends HttpServlet {
         html += "<tr><td align='right'>Please input confirmation information.&nbsp;&nbsp;</td></tr>";
         html += "<tr><td align='right'>";
         html += "<input type='text' name='confirm_id' id='confirm_id' size='30' ";
-        html += "value='" + mConfirmationId + "' />";
+        html += "value='" + (mConfirmationId == null ? "" : mConfirmationId) + "' />";
         html += "</td></tr><tr><td align='right'>";
         if (mConfirmedOk) {
             html += "<input type='hidden' name='open_gate' value='1'/>";
@@ -118,7 +122,8 @@ public class CheckConfirmation extends HttpServlet {
                 .getManager(SystemManager.COMMAND_MANAGER);
         NetworkManager nm = (NetworkManager) SystemManager.getInstance()
                 .getManager(SystemManager.NETWORK_MANAGER);
-        nm.sendMessageToTarget(mMacAddr, cm.generateOpenEntryGateCommand(mMacAddr));
+        nm.sendMessageToTarget(mMacAddr, cm.generateOpenEntryGateCommand(mMacAddr,
+                mConfirmationInfo[0], mConfirmationInfo[3]));
 
         String html = "<script type='text/javascript'>";
         html += "document.pfd.submit();";

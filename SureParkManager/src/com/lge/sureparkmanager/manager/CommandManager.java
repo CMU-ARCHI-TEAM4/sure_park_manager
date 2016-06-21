@@ -12,8 +12,7 @@ public final class CommandManager extends SystemManagerBase {
     private static final String TAG = CommandManager.class.getSimpleName();
 
     private CommandDispatcher mCommandDispatcher;
-    private HashMap<Integer, CommandListener> mCommandListener =
-            new HashMap<Integer, CommandListener>();
+    private HashMap<Integer, CommandListener> mCommandListener = new HashMap<Integer, CommandListener>();
 
     @Override
     protected void init() {
@@ -53,9 +52,10 @@ public final class CommandManager extends SystemManagerBase {
         }
     }
 
-    public String generateOpenEntryGateCommand(String macAddr) {
-        return Commands.CMD_REQ + " " + macAddr + " " + Commands.CMD_ENTRY_GATE +
-                " " + Commands.CMD_ENTRY_GATE_OPEN;
+    public String generateOpenEntryGateCommand(String macAddr, String confirmId,
+            String parkingLotIdx) {
+        return Commands.CMD_REQ + " " + macAddr + " " + Commands.CMD_ENTRY_GATE + " "
+                + Commands.CMD_ENTRY_GATE_OPEN + " " + parkingLotIdx + " " + confirmId;
     }
 
     public void parse(String data) {
@@ -103,7 +103,9 @@ public final class CommandManager extends SystemManagerBase {
                 String status = cmds[++i];
                 String parkingLotNum = cmds[++i];
                 String charging = cmds[++i];
-                mCommandDispatcher.setParkStatusInfo(macAddr, status, parkingLotNum, charging);
+                String confirmId = cmds[++i];
+                mCommandDispatcher.setParkStatusInfo(macAddr, status, parkingLotNum, charging,
+                        confirmId);
                 break;
             }
             case Commands.CMD_HEART_BIT: {
