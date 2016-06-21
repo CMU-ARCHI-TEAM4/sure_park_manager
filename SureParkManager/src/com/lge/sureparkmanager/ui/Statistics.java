@@ -23,7 +23,7 @@ import com.lge.sureparkmanager.utils.Log;
 import com.lge.sureparkmanager.utils.Utils;
 import com.lge.sureparkmanager.utils.WebSession;
 
-@WebServlet("/statistics")
+@WebServlet(description = "Statistics", urlPatterns = { "/statistics" })
 public class Statistics extends HttpServlet {
     private static final String TAG = Statistics.class.getSimpleName();
     private static final long serialVersionUID = 1L;

@@ -22,7 +22,7 @@ import com.lge.sureparkmanager.utils.WebSession;
 import nl.captcha.Captcha;
 import nl.captcha.backgrounds.GradiatedBackgroundProducer;
 
-@WebServlet({"/ad_login","/login"})
+@WebServlet(description = "login", urlPatterns = { "/ad_login","/login" })
 public class Login extends HttpServlet {
 	private static final String TAG = Login.class.getSimpleName();
 	private static final long serialVersionUID = 1L;

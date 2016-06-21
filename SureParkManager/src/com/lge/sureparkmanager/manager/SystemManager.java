@@ -29,8 +29,6 @@ public final class SystemManager {
     public static synchronized SystemManager getInstance() {
         if (mInstance == null) {
             mInstance = new SystemManager();
-            mInstance.init();
-            mInstance.mIsInit = true;
         }
         return mInstance;
     }
@@ -78,6 +76,8 @@ public final class SystemManager {
             ChargeManager chargeManager = new ChargeManager();
             chargeManager.init();
             mManagers.put(CHARGE_MANAGER, chargeManager);
+            
+            mIsInit = true;
             
         } else {
             throw new RuntimeException("SystemManager has been initialized already");

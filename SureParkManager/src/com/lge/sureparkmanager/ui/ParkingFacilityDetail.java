@@ -16,7 +16,7 @@ import com.lge.sureparkmanager.utils.Html;
 import com.lge.sureparkmanager.utils.Log;
 import com.lge.sureparkmanager.utils.WebSession;
 
-@WebServlet("/pfd")
+@WebServlet(description = "ParkingFacilityDetail", urlPatterns = { "/pfd" })
 public class ParkingFacilityDetail extends HttpServlet {
     private static final String TAG = ParkingFacilityDetail.class.getSimpleName();
     private static final long serialVersionUID = 1L;

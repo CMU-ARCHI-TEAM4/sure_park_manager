@@ -38,9 +38,9 @@ public final class CommandDispatcher {
 
         if (st == Commands.CMD_PARKING_IN) {
             Log.d(TAG, "mChargeManager: " + mChargeManager);
-            mChargeManager.checkIn(parkingFacilityName, parkingLotNum);
+            mChargeManager.checkIn(confirmId, parkingFacilityName, parkingLotNum);
         } else {
-            mChargeManager.checkOut(
+            mChargeManager.checkOut(confirmId,
                     mDataBaseManager.getQueryWrapper().getCurrentUserId(parkingLotNum), parkingFacilityName,
                     parkingLotNum);
         }
