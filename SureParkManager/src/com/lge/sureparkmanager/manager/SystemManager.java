@@ -29,6 +29,8 @@ public final class SystemManager {
     public static synchronized SystemManager getInstance() {
         if (mInstance == null) {
             mInstance = new SystemManager();
+            mInstance.init();
+            mInstance.mIsInit = true;
         }
         return mInstance;
     }

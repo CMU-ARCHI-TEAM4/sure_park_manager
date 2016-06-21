@@ -61,6 +61,7 @@ public class ChargeManager extends SystemManagerBase {
 
 			long min = period / (1000 * 60);
 			long hour = (min / 60) + (min % 60 >= 30 ? 1 : 0);
+			hour = (hour == 0 ? 1: hour); // minimum charge is one hour
 			long payment = hour * PERHOUR;
 
 			Log.d(TAG, "parking min : " + min + " hour : " + hour + " payment : " + payment);
@@ -126,26 +127,27 @@ public class ChargeManager extends SystemManagerBase {
 
 	/**
 	 * check in to parking facility
-	 * 
+	 * @param confirmID confirm id
 	 * @param facility ex>"A"
 	 * @param parkingLot ex> "1"
 	 */
-	public void checkIn(String facility, String parkingLot) {
+	public void checkIn(String confirmID, String facility, String parkingLot) {
 		
 		String current = getCurrentTime();
-		dbm.getQueryWrapper().setStartTimeToHistoyTable(current, facility, parkingLot);
+		dbm.getQueryWrapper().setStartTimeToHistoyTable(current, confirmID, facility, parkingLot);
 	}
 
 	/**
 	 * check out from parking facility
+	 * @param confirmID confirmid
 	 * @param userID ex>"or4nge"
 	 * @param facility ex> "A"
 	 * @param parkingLot ex> "1"
 	 */
-	public void checkOut(String userID, String facility, String parkingLot) {
+	public void checkOut(String confirmID, String userID, String facility, String parkingLot) {
 		
 		String current = getCurrentTime();
-		final long fee = dbm.getQueryWrapper().setEndTimeToHistoyTable(current, facility, parkingLot);
+		final long fee = dbm.getQueryWrapper().setEndTimeToHistoyTable(current, confirmID, facility, parkingLot);
 
 		UserInformation userInfo = dbm.getQueryWrapper().getUserInfomation(userID);
 		requestCharge(userInfo.getCreditCardNumber(), userInfo.getCreditCardValidation(), fee);

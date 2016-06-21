@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.TreeMap;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,6 +23,7 @@ import com.lge.sureparkmanager.utils.Log;
 import com.lge.sureparkmanager.utils.Utils;
 import com.lge.sureparkmanager.utils.WebSession;
 
+@WebServlet("/statistics")
 public class Statistics extends HttpServlet {
     private static final String TAG = Statistics.class.getSimpleName();
     private static final long serialVersionUID = 1L;
