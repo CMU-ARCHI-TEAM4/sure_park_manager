@@ -14,6 +14,7 @@ public final class SystemManager {
     public static final int INFO_PROVIDER_MANAGER = 5;
     public static final int ALIVE_CHECKER_MANAGER = 6;
     public static final int CHARGE_MANAGER = 7;
+    public static final int GRACE_PEROID_MANAGER = 8;
 
     private static SystemManager mInstance;
 
@@ -41,11 +42,6 @@ public final class SystemManager {
             DataBaseManager dataBaseManager = new DataBaseManager();
             dataBaseManager.init();
             mManagers.put(DATABASE_MANAGER, dataBaseManager);
-
-            // Initialize ChargeManager.
-            ChargeManager chargeManager = new ChargeManager();
-            chargeManager.init();
-            mManagers.put(CHARGE_MANAGER, chargeManager);
 
             // Initialize CommandManager.
             CommandManager commandManager = new CommandManager();
@@ -76,8 +72,19 @@ public final class SystemManager {
             AliveCheckerManager aliveCheckerManager = new AliveCheckerManager();
             aliveCheckerManager.init();
             mManagers.put(ALIVE_CHECKER_MANAGER, aliveCheckerManager);
-
+            
+            // Initialize ChargeManager.
+            ChargeManager chargeManager = new ChargeManager();
+            chargeManager.init();
+            mManagers.put(CHARGE_MANAGER, chargeManager);
+            
+            // Initialize GracePeriodExpirer.
+            GracePeriodExpirer gracePeriodExpirer = new GracePeriodExpirer();
+            gracePeriodExpirer.init();
+            mManagers.put(GRACE_PEROID_MANAGER, gracePeriodExpirer);
+            
             mIsInit = true;
+            
         } else {
             throw new RuntimeException("SystemManager has been initialized already");
         }

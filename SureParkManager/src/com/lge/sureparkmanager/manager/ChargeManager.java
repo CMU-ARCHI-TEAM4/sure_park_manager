@@ -13,7 +13,7 @@ import com.lge.sureparkmanager.utils.Log;
  * @author hakjoo.lee
  *
  */
-public class ChargeManager extends SystemManagerBase {
+public final class ChargeManager extends SystemManagerBase {
 
 	private static final String TAG = ChargeManager.class.getSimpleName();
 	private int PERHOUR = 0;

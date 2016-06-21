@@ -3,7 +3,11 @@ package com.lge.sureparkmanager.manager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -559,7 +563,7 @@ public final class DataBaseManager extends SystemManagerBase {
                 mResultSet.next();
                 String _idx = mResultSet.getString("idx");
                 
-                Log.d(TAG, "add reservation info with " + id);
+                Log.d(TAG, "add reservation info with " + id + ", " + parkingFacility);
                 
                 String _confirm_id = TokenGenerator.generateToken();
                 Log.d(TAG, "add reservation info confirm id  " + _confirm_id);
@@ -690,7 +694,7 @@ public final class DataBaseManager extends SystemManagerBase {
                 	ret.add(mResultSet.getString("name"));
                 }
                 
-                Log.d(TAG, "Get list of facility" + ret.size());
+                Log.d(TAG, "Get list of facility " + ret.size());
                 
                 return ret;
 
@@ -800,4 +804,36 @@ public final class DataBaseManager extends SystemManagerBase {
             return 0L;
         }
     }
+
+    /**
+     * check grace period and remove column on the table
+     * @param gracePeriod
+     */
+	public void checkGracePeriod(int gracePeriod) {
+		
+		Date date = new Date();
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+		Calendar c = Calendar.getInstance(); 
+		c.setTime(date); 
+		c.add(Calendar.MINUTE, gracePeriod);
+		Date grace = c.getTime();
+
+		final String strGrace = dateFormat.format(grace);
+		
+		Log.d(TAG, "Grace period " + strGrace);
+		
+		final String sql_set = "SET SQL_SAFE_UPDATES = 0";
+		final String sql_delete = "DELETE FROM tb_reservation WHERE start_time > '" + strGrace +"' AND confirm_id NOT IN (SELECT f.confirm_id FROM tb_history f) ";
+
+		try {
+			mDataBaseConnectionManager.getStatement().executeUpdate(sql_set);
+			mDataBaseConnectionManager.getStatement().executeUpdate(sql_delete);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 }

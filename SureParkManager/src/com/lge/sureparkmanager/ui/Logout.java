@@ -13,7 +13,7 @@ import com.lge.sureparkmanager.utils.WebSession;
 /**
  * Servlet implementation class Welcome
  */
-@WebServlet({ "/logout"})
+@WebServlet(description = "logout", urlPatterns = { "/logout" })
 public class Logout extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        

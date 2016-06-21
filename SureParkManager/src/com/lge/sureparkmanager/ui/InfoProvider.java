@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,6 +18,7 @@ import com.lge.sureparkmanager.manager.SystemManager;
 import com.lge.sureparkmanager.utils.Html;
 import com.lge.sureparkmanager.utils.Log;
 
+@WebServlet(description = "Show confirmation ID for drivers reservation", urlPatterns = { "/infop" })
 public class InfoProvider extends HttpServlet implements CommandManager.CommandListener {
     private static final String TAG = InfoProvider.class.getSimpleName();
     private static final long serialVersionUID = 1L;
@@ -91,7 +93,7 @@ public class InfoProvider extends HttpServlet implements CommandManager.CommandL
             }
             rspStr += " " + (mIsArrivedEntryGate ? 1 : 0);
             rspStr += " " + pfs;
-            //Log.d(TAG, rspStr);
+            Log.d(TAG, rspStr);
             printWriter.write(rspStr);
         } catch (Exception e) {
             e.printStackTrace();

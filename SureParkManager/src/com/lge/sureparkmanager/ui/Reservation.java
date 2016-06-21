@@ -42,6 +42,7 @@ public class Reservation extends HttpServlet {
 	private String currentTime = null;
 	private String maxTime = null;
 	private String currentTimeAfterOneHour = null;
+	private Date after3hours = null;
 	
 	private DataBaseManager dbm = (DataBaseManager)SystemManager.getInstance().getManager(
 	        SystemManager.DATABASE_MANAGER);
@@ -107,17 +108,21 @@ public class Reservation extends HttpServlet {
 		
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		currentDate = dateFormat.format(date);
+		
+		
 		Calendar c = Calendar.getInstance(); 
 		c.setTime(date); 
 		c.add(Calendar.HOUR_OF_DAY, 3);
-		Date tomorrow = c.getTime();
+		after3hours = c.getTime();
+		maxDate = dateFormat.format(after3hours);
 
-		maxDate = dateFormat.format(tomorrow);
-		
+		// check tomorrow or not
+		String todayOrNot = dateFormat.format(date);
 		dateFormat = new SimpleDateFormat("HH:mm");
+		if (todayOrNot.equals(currentDate)) { // today
+			//maxTime = dateFormat.format(after3hours);
+		}
 		currentTime = dateFormat.format(date);
-		
-		maxTime = dateFormat.format(tomorrow);
 		
 		c.setTime(date); 
 		c.add(Calendar.HOUR_OF_DAY, 1);
@@ -221,8 +226,7 @@ public class Reservation extends HttpServlet {
 		out.println("</tr>");
 		out.println("<tr>");
 		out.println("<td align=\"center\">Start Time</td>");
-		out.println("<td><input type=\"time\" name=\"start_time\" " + "value="+ currentTime /*+ " max="+ maxTime*/  +" "
-				+ "/></td>");
+		out.println("<td><input type=\"time\" name=\"start_time\" " + "value="+ currentTime + " max="+ maxTime + " /></td>");
 		out.println("</tr>");
 		out.println("<tr>");
 		out.println("<td align=\"center\">End Date</td>");
@@ -275,7 +279,7 @@ public class Reservation extends HttpServlet {
 		final String startTime = request.getParameter("start_time");
 		final String endDate = request.getParameter("end_date");
 		final String endTime = request.getParameter("end_time");
-		facility = request.getParameter("facility");
+		facility = request.getParameter("facility") != null ?  request.getParameter("facility") : facility ;
 
 		Log.d(TAG, "startDate " + startDate);
 		Log.d(TAG, "startTime " + startTime);
@@ -287,6 +291,13 @@ public class Reservation extends HttpServlet {
 		if (endTime != null && endDate != null) {
 			final Date start = stringToDate(startDate + " " + startTime);
 			final Date end = stringToDate(endDate + " " + endTime);
+			
+			if (start.getTime() > after3hours.getTime()) {
+				response.sendRedirect("reservation_invalid_start_time.html");
+				out.close();
+				return;
+			}
+			
 			if (start.getTime() >= end.getTime()) {
 				response.sendRedirect("reservation_invalid_end_time.html");
 				out.close();
