@@ -87,7 +87,11 @@ public final class DataBaseManager extends SystemManagerBase {
         private static final int CONFIG_NUM = 3;
         private String[] mConfigurationValues = new String[CONFIG_NUM];
 
+        private LogManager lm = (LogManager) SystemManager.getInstance()
+                .getManager(SystemManager.LOG_MANAGER);
+
         final String sqlCommit = "SET autocommit = 1";
+
         private QueryWrapper() {
             // getting server configuration values.
             getConfiguration();
@@ -122,6 +126,8 @@ public final class DataBaseManager extends SystemManagerBase {
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
                 mResultSet.last();
                 if (mResultSet.getRow() == 1) {
+
+                    lm.log(id.toUpperCase(), LogManager.LOGIN + " success");
                     ret = true;
                 }
             } catch (SQLException e) {
@@ -551,10 +557,9 @@ public final class DataBaseManager extends SystemManagerBase {
          * @param endTime
          * @return
          */
-        public synchronized String addReservation(String id, String parkingFacility, String startTime,
-                String endTime) {
+        public synchronized String addReservation(String id, String parkingFacility,
+                String startTime, String endTime) {
 
-        	
             final String sqlUser = "SELECT idx FROM tb_user WHERE id='" + id + "'";
             ResultSet resevedLotResult = null;
             ResultSet mResultSet3 = null;
@@ -564,94 +569,98 @@ public final class DataBaseManager extends SystemManagerBase {
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlUser);
                 mResultSet.next();
                 String _idx = mResultSet.getString("idx");
-                
+
                 Log.d(TAG, "add reservation info with " + id + ", " + parkingFacility);
-                
+
                 String _confirm_id = TokenGenerator.generateToken();
                 Log.d(TAG, "add reservation info confirm id  " + _confirm_id);
-                
-				//mResultSet.close();
-				
-				final int totalLot = getTotalNumberOfLots(parkingFacility);
-				
-				//find empty parking lot at that time
-				final String sqlTime = "SELECT tb_parkinglot_idx FROM tb_reservation WHERE (start_time <= '" + startTime
-						+ "' AND end_time > '" + startTime + "' ) OR (start_time < '" + endTime + "'  AND end_time >= '"
-						+ endTime + "')";
-				
-				Log.d(TAG, "sql for reserved lots : " + sqlTime);
-                
-				mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlTime);
+
+                // mResultSet.close();
+
+                final int totalLot = getTotalNumberOfLots(parkingFacility);
+
+                // find empty parking lot at that time
+                final String sqlTime = "SELECT tb_parkinglot_idx FROM tb_reservation WHERE (start_time <= '"
+                        + startTime + "' AND end_time > '" + startTime + "' ) OR (start_time < '"
+                        + endTime + "'  AND end_time >= '" + endTime + "')";
+
+                Log.d(TAG, "sql for reserved lots : " + sqlTime);
+
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlTime);
                 final int reservedTotalLot = mResultSet.getFetchSize();
                 Log.d(TAG, "reserved lots number : " + reservedTotalLot);
-                
-                
-                
+
                 // check the number of lots
                 if (reservedTotalLot > totalLot) {
-                	Log.d(TAG, "out of lots");
-                	return null;
+                    Log.d(TAG, "out of lots");
+                    return null;
                 }
-                
-                int[] lots = new int[totalLot+1]; // from 1 to totalLot
-                ArrayList<String> parkinglotIdxList= new ArrayList<String>();
+
+                int[] lots = new int[totalLot + 1]; // from 1 to totalLot
+                ArrayList<String> parkinglotIdxList = new ArrayList<String>();
                 while (mResultSet.next()) {
-                	parkinglotIdxList.add(mResultSet.getString("tb_parkinglot_idx"));
+                    parkinglotIdxList.add(mResultSet.getString("tb_parkinglot_idx"));
                 }
-                
+
                 Iterator<String> it = parkinglotIdxList.iterator();
                 while (it.hasNext()) {
                     String parkinglot_idx = (String) it.next();
                     Log.d(TAG, "parkinglot_idx " + parkinglot_idx);
-                    String sqlParkingLot =  "SELECT name FROM tb_parkinglot WHERE idx='" + parkinglot_idx + "'";
+                    String sqlParkingLot = "SELECT name FROM tb_parkinglot WHERE idx='"
+                            + parkinglot_idx + "'";
 
-                    mResultSet2 = mDataBaseConnectionManager.getStatement().executeQuery(sqlParkingLot);
+                    mResultSet2 = mDataBaseConnectionManager.getStatement()
+                            .executeQuery(sqlParkingLot);
                     mResultSet2.next();
                     String name = mResultSet2.getString("name");
-                    //mResultSet2.close();
-                    
-                    String tt = name.substring(name.length()-5);
-                    
+                    // mResultSet2.close();
+
+                    String tt = name.substring(name.length() - 5);
+
                     Log.d(TAG, "lots name : " + name + " length : " + name.length());
                     int reservedLot = Integer.parseInt(tt);
-                    Log.d(TAG, "the number of lots "  + reservedLot);
-                    //int reservedLot = Integer.getInteger(name.substring(name.length()-5));
-                    lots[reservedLot] = Integer.parseInt(parkinglot_idx); //occupied lots
-                    Log.d(TAG, "lots[reservedLot] "  + lots[reservedLot]);
-                    
+                    Log.d(TAG, "the number of lots " + reservedLot);
+                    // int reservedLot =
+                    // Integer.getInteger(name.substring(name.length()-5));
+                    lots[reservedLot] = Integer.parseInt(parkinglot_idx); // occupied
+                                                                          // lots
+                    Log.d(TAG, "lots[reservedLot] " + lots[reservedLot]);
+
                 }
-                
+
                 // get the number of lot in parkingFacility
                 int _empty_lot = -1;
-                
-                for (int j=1; j<=totalLot; j++) {
-                	if (lots[j] == 0) {
-                		Log.d(TAG, "find out empty lot " + lots[j]);
-                		_empty_lot = j;
-                		break;
-                	}
+
+                for (int j = 1; j <= totalLot; j++) {
+                    if (lots[j] == 0) {
+                        Log.d(TAG, "find out empty lot " + lots[j]);
+                        _empty_lot = j;
+                        break;
+                    }
                 }
-                
+
                 if (_empty_lot == -1) {
-                	// no empty space
-                	Log.d(TAG, "can't reserve the space");
-                	Log.e(TAG, "can't reserve the space");
-                	return null;
+                    // no empty space
+                    Log.d(TAG, "can't reserve the space");
+                    Log.e(TAG, "can't reserve the space");
+                    return null;
                 }
-                
+
                 // find out tb_parkinglot_idx
                 String idx = String.format("%S%05d", parkingFacility, _empty_lot);
-                Log.d(TAG, "find out idx from tb_parkinglot "  + idx);
-                String sqlParkingidx =  "SELECT idx FROM tb_parkinglot WHERE name='" + idx + "'";
+                Log.d(TAG, "find out idx from tb_parkinglot " + idx);
+                String sqlParkingidx = "SELECT idx FROM tb_parkinglot WHERE name='" + idx + "'";
                 mResultSet3 = mDataBaseConnectionManager.getStatement().executeQuery(sqlParkingidx);
                 mResultSet3.next();
-                
-                
+
                 final String sql = "INSERT into tb_reservation (tb_user_idx, start_time, end_time, tb_parkinglot_idx, confirm_id) VALUES('"
-                        + _idx + "', '" + startTime + "', '" + endTime + "', '" + mResultSet3.getString("idx") + "', '" + _confirm_id + "')";
+                        + _idx + "', '" + startTime + "', '" + endTime + "', '"
+                        + mResultSet3.getString("idx") + "', '" + _confirm_id + "')";
 
                 mDataBaseConnectionManager.getStatement().executeUpdate(sqlCommit);
                 mDataBaseConnectionManager.getStatement().executeUpdate(sql);
+
+                lm.log(LogManager.DRIVER, LogManager.BOOKING + "/" + _confirm_id + "/" + id);
 
                 return _confirm_id;
 
@@ -665,18 +674,18 @@ public final class DataBaseManager extends SystemManagerBase {
                         e.printStackTrace();
                     }
                 }
-                
+
                 if (resevedLotResult != null) {
                     try {
-                    	resevedLotResult.close();
+                        resevedLotResult.close();
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 }
-                
+
                 if (mResultSet3 != null) {
                     try {
-                    	mResultSet3.close();
+                        mResultSet3.close();
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -685,21 +694,21 @@ public final class DataBaseManager extends SystemManagerBase {
 
             return null;
         }
-        
+
         public List<String> getListOfFacility() {
 
             final String sql = "SELECT name FROM tb_controller";
             ArrayList<String> ret = new ArrayList<String>();
-            
+
             try {
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
 
                 while (mResultSet.next()) {
-                	ret.add(mResultSet.getString("name"));
+                    ret.add(mResultSet.getString("name"));
                 }
-                
+
                 Log.d(TAG, "Get list of facility " + ret.size());
-                
+
                 return ret;
 
             } catch (SQLException e) {
@@ -716,33 +725,36 @@ public final class DataBaseManager extends SystemManagerBase {
 
             return ret;
         }
-        
-        
+
         /**
          * insert history with start time
+         * 
          * @param startTime
          * @param facility
          * @param parkingLot
          */
-        public synchronized void setStartTimeToHistoyTable(String startTime, String confirmID, String facility, String parkingLot) {
+        public synchronized void setStartTimeToHistoyTable(String startTime, String confirmID,
+                String facility, String parkingLot) {
 
             try {
 
-            	// find out tb_parkinglot_idx
+                // find out tb_parkinglot_idx
                 String idx = String.format("%S%05d", facility, Integer.parseInt(parkingLot));
-                Log.d(TAG, "find out idx from tb_parkinglot "  + idx);
-                String sqlParkingidx =  "SELECT idx FROM tb_parkinglot WHERE name='" + idx + "'";
+                Log.d(TAG, "find out idx from tb_parkinglot " + idx);
+                String sqlParkingidx = "SELECT idx FROM tb_parkinglot WHERE name='" + idx + "'";
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlParkingidx);
                 mResultSet.next();
                 final String parkinglot_idx = mResultSet.getString("idx");
-                
+
                 final String sql = "INSERT into tb_history (tb_parkinglot_idx, start_time, confirm_id) VALUES('"
-                        + parkinglot_idx + "', '" +startTime + "', '" + confirmID +"' )";
+                        + parkinglot_idx + "', '" + startTime + "', '" + confirmID + "' )";
 
                 mDataBaseConnectionManager.getStatement().executeUpdate(sqlCommit);
                 mDataBaseConnectionManager.getStatement().executeUpdate(sql);
-                
-                Log.d(TAG, "insert new history "  + parkinglot_idx +" "+ startTime);
+
+                lm.log(LogManager.DRIVER, LogManager.PARK + "/" + confirmID + "/" + startTime);
+
+                Log.d(TAG, "insert new history " + parkinglot_idx + " " + startTime);
             } catch (SQLException e) {
                 e.printStackTrace();
             } finally {
@@ -755,46 +767,56 @@ public final class DataBaseManager extends SystemManagerBase {
                 }
             }
         }
-        
+
         /**
          * set end time into history table
+         * 
          * @param endTime
          * @param facility
          * @param parkingLot
          * @return fee
          */
-        public synchronized long setEndTimeToHistoyTable(String endTime, String confirmID, String facility, String parkingLot) {
+        public synchronized long setEndTimeToHistoyTable(String endTime, String confirmID,
+                String facility, String parkingLot) {
 
             try {
 
-            	// find out tb_parkinglot_idx
+                // find out tb_parkinglot_idx
                 final String name = String.format("%S%05d", facility, Integer.parseInt(parkingLot));
-                Log.d(TAG, "find out idx from tb_parkinglot "  + name);
-                final String sqlParkingidx =  "SELECT idx FROM tb_parkinglot WHERE name='" + name + "'";
+                Log.d(TAG, "find out idx from tb_parkinglot " + name);
+                final String sqlParkingidx = "SELECT idx FROM tb_parkinglot WHERE name='" + name
+                        + "'";
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlParkingidx);
                 mResultSet.next();
                 final String idx = mResultSet.getString("idx");
-                
-                final String sqlStartTime = "SELECT start_time FROM tb_history WHERE tb_parkinglot_idx='" + idx + "' AND confirm_id='"+ confirmID +"'";
+
+                final String sqlStartTime = "SELECT start_time FROM tb_history WHERE tb_parkinglot_idx='"
+                        + idx + "' AND confirm_id='" + confirmID + "'";
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlStartTime);
                 mResultSet.next();
                 final String startTime = mResultSet.getString("start_time");
-                
-                final long fee = ((ChargeManager)SystemManager.getInstance().getManager(SystemManager.CHARGE_MANAGER)).calculateCharge(startTime, endTime);
-                //UPDATE tb_history SET end_time='2016-10-11 11:11'WHERE idx='1' AND end_time IS NULL
-                final String sql = "UPDATE tb_history SET end_time='"
-                        + endTime + "', fee='"+ fee+ "' WHERE tb_parkinglot_idx='" + idx + "' AND confirm_id='"+ confirmID +"'" ;
-                
+
+                final long fee = ((ChargeManager) SystemManager.getInstance()
+                        .getManager(SystemManager.CHARGE_MANAGER)).calculateCharge(startTime,
+                                endTime);
+                // UPDATE tb_history SET end_time='2016-10-11 11:11'WHERE
+                // idx='1' AND end_time IS NULL
+                final String sql = "UPDATE tb_history SET end_time='" + endTime + "', fee='" + fee
+                        + "' WHERE tb_parkinglot_idx='" + idx + "' AND confirm_id='" + confirmID
+                        + "'";
+
                 mDataBaseConnectionManager.getStatement().executeUpdate(sql);
-                
-                //delete reservation information from reservation table
-                final String sqlDelete = "DELETE FROM tb_reservation WHERE " + "confirm_id='"+ confirmID +"'" ;
-                
+
+                // delete reservation information from reservation table
+                final String sqlDelete = "DELETE FROM tb_reservation WHERE " + "confirm_id='"
+                        + confirmID + "'";
+
                 mDataBaseConnectionManager.getStatement().executeUpdate(sqlCommit);
                 mDataBaseConnectionManager.getStatement().executeUpdate(sqlDelete);
-                
+
+                lm.log(LogManager.DRIVER, LogManager.LEAVE + "/" + confirmID + "/" + endTime +" / " + fee);
                 return fee;
-                
+
             } catch (SQLException e) {
                 e.printStackTrace();
             } finally {
@@ -806,61 +828,65 @@ public final class DataBaseManager extends SystemManagerBase {
                     }
                 }
             }
-            
+
             return 0L;
         }
 
         /**
          * check grace period and remove column on the table
+         * 
          * @param gracePeriod
          */
-    	public synchronized void checkGracePeriod(int gracePeriod) {
-    		
-    		Date date = new Date();
-    		
-    		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        public synchronized void checkGracePeriod(int gracePeriod) {
 
-    		Calendar c = Calendar.getInstance(); 
-    		c.setTime(date); 
-    		c.add(Calendar.MINUTE, gracePeriod);
-    		Date grace = c.getTime();
+            Date date = new Date();
 
-    		final String strGrace = dateFormat.format(grace);
-    		
-    		Log.d(TAG, "Grace period " + strGrace);
-    		
-    		final String sql_set = "SET SQL_SAFE_UPDATES = 0";
-    		final String sql_delete = "DELETE FROM tb_reservation WHERE start_time < '" + strGrace +"' AND confirm_id NOT IN (SELECT f.confirm_id FROM tb_history f) ";
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
-    		try {
-    			mDataBaseConnectionManager.getStatement().executeUpdate(sqlCommit);
-    			mDataBaseConnectionManager.getStatement().executeUpdate(sql_set);
-    			mDataBaseConnectionManager.getStatement().executeUpdate(sql_delete);
-    		} catch (SQLException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
-    		
-    	}
-    	
-    	/**
+            Calendar c = Calendar.getInstance();
+            c.setTime(date);
+            c.add(Calendar.MINUTE, gracePeriod);
+            Date grace = c.getTime();
+
+            final String strGrace = dateFormat.format(grace);
+
+            Log.d(TAG, "Grace period " + strGrace);
+
+            final String sql_set = "SET SQL_SAFE_UPDATES = 0";
+            final String sql_delete = "DELETE FROM tb_reservation WHERE start_time < '" + strGrace
+                    + "' AND confirm_id NOT IN (SELECT f.confirm_id FROM tb_history f) ";
+
+            try {
+                mDataBaseConnectionManager.getStatement().executeUpdate(sqlCommit);
+                mDataBaseConnectionManager.getStatement().executeUpdate(sql_set);
+                int count = mDataBaseConnectionManager.getStatement().executeUpdate(sql_delete);
+
+                if (count != 0) {
+                    lm.log(LogManager.DRIVER,
+                            LogManager.CANCEL_BOOKING + "/NUM of CANCEL : " + count);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        /**
          * write log message
+         * 
          * @param gracePeriod
          */
-    	public void log(String msg) {
-    		
-    		final String sql = "INSERT into tb_log (message) VALUES('" + msg + "' )";
-    		try {
-    			mDataBaseConnectionManager.getStatement().executeUpdate(sql);
-    		} catch (SQLException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
-    		
-    	}
+        public void log(String msg) {
+
+            final String sql = "INSERT into tb_log (message) VALUES('" + msg + "' )";
+            try {
+                mDataBaseConnectionManager.getStatement().executeUpdate(sql);
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        }
     }
 
-   
-	
-	
 }

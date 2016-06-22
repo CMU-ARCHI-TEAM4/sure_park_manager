@@ -6,4 +6,7 @@ public class WebSession {
 
     public static final String SESSION_USERID_ADMIN = "admin";
     public static final String SESSION_USERID_ATTENDANT = "attendant";
+    
+    public static final String SESSION_LOGIN_FAILED_COUNT = "failed_count";
+    
 }

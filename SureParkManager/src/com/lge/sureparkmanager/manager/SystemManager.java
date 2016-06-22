@@ -15,8 +15,9 @@ public final class SystemManager {
     public static final int ALIVE_CHECKER_MANAGER = 6;
     public static final int CHARGE_MANAGER = 7;
     public static final int GRACE_PEROID_MANAGER = 8;
+    public static final int LOG_MANAGER = 9;
 
-    private static SystemManager mInstance;
+    private static SystemManager mInstance = new SystemManager();
 
     private HashMap<Integer, SystemManagerBase> mManagers = new HashMap<Integer, SystemManagerBase>();
     private CommandQueue mCommandQueue;
@@ -24,7 +25,6 @@ public final class SystemManager {
     private boolean mIsInit = false;
 
     private SystemManager() {
-
     }
 
     public static synchronized SystemManager getInstance() {
@@ -34,14 +34,29 @@ public final class SystemManager {
         return mInstance;
     }
 
-    public void init() {
+    public synchronized void init() {
         if (!mIsInit) {
             Log.d(TAG, "init");
+
+            // Initialize LogManager.
+            LogManager logManager = new LogManager();
+            logManager.init();
+            mManagers.put(LOG_MANAGER, logManager);
 
             // Initialize DataBaseManager.
             DataBaseManager dataBaseManager = new DataBaseManager();
             dataBaseManager.init();
             mManagers.put(DATABASE_MANAGER, dataBaseManager);
+
+            // Initialize ConfigurationManager.
+            ConfigurationManager configurationManager = new ConfigurationManager();
+            configurationManager.init();
+            mManagers.put(CONFIGURATION_MANAGER, configurationManager);
+
+            // Initialize ChargeManager.
+            ChargeManager chargeManager = new ChargeManager();
+            chargeManager.init();
+            mManagers.put(CHARGE_MANAGER, chargeManager);
 
             // Initialize CommandManager.
             CommandManager commandManager = new CommandManager();
@@ -52,11 +67,6 @@ public final class SystemManager {
             mCommandQueue = new CommandQueue();
             Thread commandQueueThread = new Thread(mCommandQueue);
             commandQueueThread.start();
-
-            // Initialize ConfigurationManager.
-            ConfigurationManager configurationManager = new ConfigurationManager();
-            configurationManager.init();
-            mManagers.put(CONFIGURATION_MANAGER, configurationManager);
 
             // Initialize InfoProviderManager.
             InfoProviderManager infoProviderManager = new InfoProviderManager();
@@ -72,26 +82,30 @@ public final class SystemManager {
             AliveCheckerManager aliveCheckerManager = new AliveCheckerManager();
             aliveCheckerManager.init();
             mManagers.put(ALIVE_CHECKER_MANAGER, aliveCheckerManager);
-            
-            // Initialize ChargeManager.
-            ChargeManager chargeManager = new ChargeManager();
-            chargeManager.init();
-            mManagers.put(CHARGE_MANAGER, chargeManager);
-            
+
             // Initialize GracePeriodExpirer.
             GracePeriodExpirer gracePeriodExpirer = new GracePeriodExpirer();
             gracePeriodExpirer.init();
             mManagers.put(GRACE_PEROID_MANAGER, gracePeriodExpirer);
-            
+
             mIsInit = true;
-            
+
         } else {
-            throw new RuntimeException("SystemManager has been initialized already");
+            // throw new RuntimeException("SystemManager has been initialized
+            // already");
+            System.err.println("SystemManager has been initialized already");
         }
     }
 
-    public SystemManagerBase getManager(int manager) {
-        return mManagers.get(manager);
+    public synchronized SystemManagerBase getManager(int manager) {
+
+        SystemManagerBase ret = mManagers.get(manager);
+
+        if (ret == null) {
+            System.err.println("manager is null!!" + manager);
+        }
+
+        return ret;
     }
 
     public DataBaseManager getDataBaseManager() {

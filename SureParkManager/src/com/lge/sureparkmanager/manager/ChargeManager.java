@@ -150,6 +150,6 @@ public final class ChargeManager extends SystemManagerBase {
 		final long fee = dbm.getQueryWrapper().setEndTimeToHistoyTable(current, confirmID, facility, parkingLot);
 
 		UserInformation userInfo = dbm.getQueryWrapper().getUserInfomation(userID);
-		requestCharge(userInfo.getCreditCardNumber(), userInfo.getCreditCardValidation(), fee);
-	}
+        requestCharge(userInfo.getCreditCardNumber(), userInfo.getCreditCardValidation(), fee);
+    }
 }
