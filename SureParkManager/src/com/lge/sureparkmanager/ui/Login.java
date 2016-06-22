@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Base64;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
@@ -33,6 +34,7 @@ public class Login extends HttpServlet {
             .getManager(SystemManager.LOG_MANAGER);
 
     private String captchaAnswer = "";
+    private int token = -1;
 
     public Login() {
         super();
@@ -51,6 +53,8 @@ public class Login extends HttpServlet {
         String id = request.getParameter("id");
         String pw = request.getParameter("passwd");
         String captchaUser = request.getParameter("captcha");
+        String otp = request.getParameter("otp");
+        
 
         HttpSession session = request.getSession();
         
@@ -58,8 +62,10 @@ public class Login extends HttpServlet {
             Log.d(TAG, "Equals Confirmed with captcha " + captchaAnswer);
         }
 
+        Log.d(TAG, "OTP  " + otp +"  TOKEN " + token);
+        
         if (dbm != null && dbm.getQueryWrapper().isLoginOk(id, pw)
-                && captchaAnswer.equals(captchaUser)) {
+                && captchaAnswer.equals(captchaUser) && (token != -1 || Integer.parseInt(otp) == token)) {
 
             Log.d(TAG, "Athorized user " + captchaAnswer);
 
@@ -105,6 +111,10 @@ public class Login extends HttpServlet {
                     }
                     
                     printWriter.write(getLoginHtml("Login for Administrator"));
+                    Random rand = new Random();
+                    token = rand.nextInt((Integer.MAX_VALUE - 10000) + 1) + 10000;
+                    printWriter.write(getJsPrompt(token));
+                    
                 } else {
                     printWriter.write(getLoginHtml("Login for Driver"));
                 }
@@ -172,8 +182,11 @@ public class Login extends HttpServlet {
         html += "<td><input type='text' name='id' id='id' size='20' /></td>";
         html += "</tr><tr><td align='center'>PW</td>";
         html += "<td><input type='password' name='passwd' id='passwd' size='20' /></td></tr>";
+        html += "</tr><tr><td align='center'>OTP TOKEN</td>";
+        html += "<td><input type='text' name='otp' id='otp' size='20' /></td>";
         html += "<tr><td><img alt='lg twins' src='" + captcha + "' /></td>";
         html += "<td><input type='text' name='captcha' id='captcha' /></tr>";
+        
         html += "<tr ><td colspan='2' align='center'>";
         html += "<a href='javascript:submitform();'><input type='button' value='Login'/></a>";
         html += "<a href='javascript:window.history.back();'><input type='button' value='Cancle'/></a>";
@@ -194,6 +207,11 @@ public class Login extends HttpServlet {
 
     private String getJsAlert() {
         String html = "<script type='text/javascript'> alert('THIS IS SMS. UNATHORIZE USER DETECTED !!!.'); </script>";
+        return html;
+    }
+    
+    private String getJsPrompt(int token) {
+        String html = "<script type='text/javascript'> prompt('THIS IS SMS FROM SYSTEM. YOUR TOKEN IS', '"+ token + "'); </script>";
         return html;
     }
 }

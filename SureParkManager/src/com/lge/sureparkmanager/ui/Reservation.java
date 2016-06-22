@@ -170,12 +170,6 @@ public class Reservation extends HttpServlet {
 		getDataFromDB(id);
 		List<String> facilities = getListOfFacility();
 		
-		//TEST CODE; remove it
-		//List<String> facilities = new ArrayList<String>();
-		//facilities.add("A");
-		//facilities.add("B");
-		//END TEST CODE
-		
 		//default facility
 		String facility = facilities.get(0);
 		
