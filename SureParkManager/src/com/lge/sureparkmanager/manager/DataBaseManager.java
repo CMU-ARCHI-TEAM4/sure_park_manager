@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -12,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.lge.sureparkmanager.db.DataBaseConnection;
-import com.lge.sureparkmanager.db.UserInformation;
 import com.lge.sureparkmanager.utils.Log;
 import com.lge.sureparkmanager.utils.Utils;
 
@@ -166,6 +166,50 @@ public final class DataBaseManager extends SystemManagerBase {
             }
 
             return parkingFacilityName;
+        }
+
+        public String getReservationParkingLotName(String confirmId) {
+            final String sql = "SELECT name FROM sure_park_system.tb_reservation INNER JOIN "
+                    + "tb_parkinglot ON tb_parkinglot_idx=tb_parkinglot.idx WHERE " + "confirm_id='"
+                    + confirmId + "'";
+            String parkingLotName = null;
+            try {
+                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
+                while (mResultSet.next()) {
+                    parkingLotName = mResultSet.getString("name");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (mResultSet != null) {
+                    try {
+                        mResultSet.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return parkingLotName;
+        }
+
+        public void reallocationParkingLot(String confirmId, String oriParkingLotName,
+                String newParkingLotName) {
+            final int oriParkingLotTbIdx = getParkingLotIdx(oriParkingLotName);
+            final int newParkingLotTbIdx = getParkingLotIdx(newParkingLotName);
+
+            try {
+                String sql = "UPDATE tb_reservation SET tb_parkinglot_idx='" + oriParkingLotTbIdx
+                        + "' WHERE tb_parkinglot_idx='" + newParkingLotTbIdx + "' AND "
+                        + "start_time <='" + Utils.getCurrentDateTime(Utils.DATE_FORMAT) + "'";
+                mDataBaseConnectionManager.getStatement().executeUpdate(sql);
+
+                sql = "UPDATE tb_reservation SET tb_parkinglot_idx='" + newParkingLotTbIdx
+                        + "' WHERE confirm_id='" + confirmId + "'";
+                mDataBaseConnectionManager.getStatement().executeUpdate(sql);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         public String getParkingFacilityMacAddr(String pfn) {
@@ -328,13 +372,17 @@ public final class DataBaseManager extends SystemManagerBase {
 
         public String getParkStatusInfo(String pfn) {
             String rsp = "";
-            final String sql = "SELECT name, status FROM tb_parkinglot WHERE name LIKE '" + pfn
+            String sql = "SELECT idx, name, status FROM tb_parkinglot WHERE name LIKE '" + pfn
                     + "%'";
+            ArrayList<String> names = new ArrayList<String>();
+            ArrayList<String> status = new ArrayList<String>();
+            ArrayList<String> idxs = new ArrayList<String>();
             try {
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
                 while (mResultSet.next()) {
-                    rsp += mResultSet.getString("name");
-                    rsp += ":" + mResultSet.getString("status") + "^";
+                    names.add(mResultSet.getString("name"));
+                    status.add(mResultSet.getString("status"));
+                    idxs.add(mResultSet.getString("idx"));
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -346,6 +394,46 @@ public final class DataBaseManager extends SystemManagerBase {
                         e.printStackTrace();
                     }
                 }
+            }
+
+            for (int i = 0; i < idxs.size(); i++) {
+                String idx = idxs.get(i);
+                String name = names.get(i);
+                String stat = status.get(i);
+                sql = "SELECT start_time FROM sure_park_system.tb_history WHERE tb_parkinglot_idx='"
+                        + idx + "' AND start_time IS NOT NULL AND end_time IS NULL "
+                        + "ORDER BY idx DESC LIMIT 1";
+                String rslt = null;
+                try {
+                    mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
+                    while (mResultSet.next()) {
+                        rslt = mResultSet.getString("start_time");
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (mResultSet != null) {
+                        try {
+                            mResultSet.close();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                rsp += name + ":" + stat + ":";
+                if (rslt == null || "0".equals(stat)) {
+                    rsp += "0";
+                } else {
+                    long diff = 0;
+                    SimpleDateFormat format = new SimpleDateFormat(Utils.DATE_FORMAT);
+                    try {
+                        diff = System.currentTimeMillis() - format.parse(rslt).getTime();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    rsp += diff;
+                }
+                rsp += "^";
             }
 
             return rsp;
@@ -448,10 +536,9 @@ public final class DataBaseManager extends SystemManagerBase {
             String[] ret = null;
             final String sql = "SELECT confirm_id, start_time, end_time, name FROM "
                     + "tb_reservation INNER JOIN tb_parkinglot ON tb_parkinglot_idx = "
-                    + "tb_parkinglot.idx WHERE confirm_id='" + cfId
-                    + "' AND start_time >= '2016-06-19 17:37'"; // +
-                                                                // Utils.getCurrentDateTime()
-                                                                // + "'";
+                    + "tb_parkinglot.idx WHERE confirm_id='" + cfId;/* + "' AND start_time >= '"
+                    + Utils.getCurrentDateTime(Utils.DATE_FORMAT) + "'";*/
+
             try {
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
                 mResultSet.first();

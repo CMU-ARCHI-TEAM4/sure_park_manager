@@ -1,40 +1,56 @@
 <!DOCTYPE html>
 <html>
 
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
-        <title>Sure-Park</title>
-        <link rel="stylesheet" href="style.css" type='text/css'>
-    </head>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+<title>Sure-Park</title>
+<link rel="stylesheet" href="style.css" type='text/css'>
+</head>
 
 <script type="text/javascript">
-function submitform() {
-    if(document.pf.onsubmit && !document.pf.onsubmit()) {
-        return;
-    }
-    document.pf.
-    document.pf.submit();
-}
-window.history.back();
+	function submitform() {
+		if (document.pf.onsubmit && !document.pf.onsubmit()) {
+			return;
+		}
+		document.pf.document.pf.submit();
+	}
+
+	//setInterval(getDateTimeSince, 1000, '349310');
+	function getDateTimeSince(diff) {
+		var timeDiff = (diff) / 1000;
+
+		var seconds = Math.round(timeDiff % 60);
+		timeDiff = Math.floor(timeDiff / 60);
+		var minutes = Math.round(timeDiff % 60);
+		timeDiff = Math.floor(timeDiff / 60);
+		var hours = Math.round(timeDiff % 24);
+		timeDiff = Math.floor(timeDiff / 24);
+		var days = timeDiff;
+
+		var elapsed = "";
+		elapsed += ((days > 0) ? days : "00") + " days</br>";
+		elapsed += ((hours > 0) ? (hours < 10) ? "0" + hours : hours : "00") + ":";
+		elapsed += ((minutes > 0) ? (minutes < 10) ? "0" + minutes : minutes : "00");
+
+		return elapsed;
+	}
+	document.write(getDateTimeSince('349310'));
 </script>
 
-    <body>
-        <h1 class="center">Parking facility status</h1>
-        <form name="pf" action="pf" method="post"> <table class="centerTable">
-	            <tr><td align="center"><a href="javascript:submitform()">
-	                   <img src="images/parking_icon.png" width="40%" height="50%" /></a>
-	                   </br>sdfsddfd</br>
-	                   dfdssd
-	               </td>
-	               <td align="center">
-                       <img src="images/parking_icon.png" width="45%" height="50%" /></br>
-                       sdfsddfd</br>
-                       dfdssd
-                       <input type="hidden" name="pf_name" value="Norway">
-                   </td>
-	            </tr>
-	        </table>
-	    </form>
-    </body>
+<body>
+	<h1 class="center">Parking facility status</h1>
+	<form name="pf" action="pf" method="post">
+		<table class="centerTable">
+			<tr>
+				<td align="center"><a href="javascript:submitform()"> <img
+						src="images/parking_icon.png" width="40%" height="50%" /></a> </br>sdfsddfd</br>
+					dfdssd</td>
+				<td align="center"><img src="images/parking_icon.png"
+					width="45%" height="50%" /></br> sdfsddfd</br> dfdssd <input type="hidden"
+					name="pf_name" value="Norway"></td>
+			</tr>
+		</table>
+	</form>
+</body>
 
 </html>

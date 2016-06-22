@@ -30,6 +30,10 @@ public final class CommandQueue implements Runnable {
         }
     }
 
+    public void removeAllCommand() {
+        mCmdQueue.clear();
+    }
+
     public void stop() {
         mStop = true;
     }

@@ -17,7 +17,7 @@ public final class SystemManager {
     public static final int GRACE_PEROID_MANAGER = 8;
     public static final int LOG_MANAGER = 9;
 
-    private static SystemManager mInstance = new SystemManager();
+    private static SystemManager mInstance;
 
     private HashMap<Integer, SystemManagerBase> mManagers = new HashMap<Integer, SystemManagerBase>();
     private CommandQueue mCommandQueue;
@@ -89,23 +89,13 @@ public final class SystemManager {
             mManagers.put(GRACE_PEROID_MANAGER, gracePeriodExpirer);
 
             mIsInit = true;
-
         } else {
-            // throw new RuntimeException("SystemManager has been initialized
-            // already");
-            System.err.println("SystemManager has been initialized already");
+            throw new RuntimeException("SystemManager has been initialized already");
         }
     }
 
-    public synchronized SystemManagerBase getManager(int manager) {
-
-        SystemManagerBase ret = mManagers.get(manager);
-
-        if (ret == null) {
-            System.err.println("manager is null!!" + manager);
-        }
-
-        return ret;
+    public SystemManagerBase getManager(int manager) {
+        return mManagers.get(manager);
     }
 
     public DataBaseManager getDataBaseManager() {

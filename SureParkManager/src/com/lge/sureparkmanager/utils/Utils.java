@@ -9,7 +9,9 @@ import java.util.Random;
 
 public class Utils {
     public static final String COMMAND_SEPARATOR = " ";
+    public static final String COMMAND_LAST_CHAR = ">";
     public static String DATE_FORMAT = "yyyy-MM-dd HH:mm";
+    public static String DEVICE_SYNC_TIME_FORMAT = "yyyy-MM-dd-HH-mm-ss";
 
     public static String getNextControllerName(String curName) {
         final char[] curNameCh = curName.toCharArray();
@@ -69,8 +71,8 @@ public class Utils {
         return parkingLotName.substring(0, parkingLotName.indexOf("0"));
     }
 
-    public static String getCurrentDateTime() {
-        DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+    public static String getCurrentDateTime(String format) {
+        DateFormat dateFormat = new SimpleDateFormat(format);
         Date date = new Date();
         return dateFormat.format(date);
     }

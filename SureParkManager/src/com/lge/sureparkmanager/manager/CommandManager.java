@@ -101,10 +101,10 @@ public final class CommandManager extends SystemManagerBase {
             }
             case Commands.CMD_PARKING: {
                 String status = cmds[++i];
-                String parkingLotNum = cmds[++i];
+                String parkingLotIdx = cmds[++i];
                 String charging = cmds[++i];
                 String confirmId = cmds[++i];
-                mCommandDispatcher.setParkStatusInfo(macAddr, status, parkingLotNum, charging,
+                mCommandDispatcher.setParkStatusInfo(macAddr, status, parkingLotIdx, charging,
                         confirmId);
                 break;
             }
@@ -120,6 +120,15 @@ public final class CommandManager extends SystemManagerBase {
             case Commands.CMD_ENTRY_SENSOR: {
                 @SuppressWarnings("unused")
                 int status = subCmd = Integer.parseInt(cmds[++i]);
+                break;
+            }
+            case Commands.CMD_EXIT_SENSOR: {
+                @SuppressWarnings("unused")
+                int status = subCmd = Integer.parseInt(cmds[++i]);
+                break;
+            }
+            case Commands.CMD_TIME_SYNC: {
+                // Do nothing.
                 break;
             }
             default:
