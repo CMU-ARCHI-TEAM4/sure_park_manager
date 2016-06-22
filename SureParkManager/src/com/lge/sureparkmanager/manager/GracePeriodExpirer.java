@@ -9,7 +9,7 @@ import com.lge.sureparkmanager.utils.Log;
  */
 public final class GracePeriodExpirer extends SystemManagerBase {
 
-	private final static int PERIOD = 60 * 1000;
+	private final static int PERIOD = 60 * 1000 ;
 	
 	private static final String TAG = ChargeManager.class.getSimpleName();
 	private DataBaseManager dbm = (DataBaseManager)SystemManager.getInstance().getManager(
@@ -40,7 +40,7 @@ public final class GracePeriodExpirer extends SystemManagerBase {
             	// check db
             	Log.d(TAG, "GracePeriodExpirer is running");
             	
-            	dbm.checkGracePeriod(GRACE_PERIOD);
+            	dbm.getQueryWrapper().checkGracePeriod(GRACE_PERIOD);
                 try {
                     Thread.sleep(PERIOD);
                 } catch (InterruptedException e1) {

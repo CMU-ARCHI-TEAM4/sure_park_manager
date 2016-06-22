@@ -87,6 +87,7 @@ public final class DataBaseManager extends SystemManagerBase {
         private static final int CONFIG_NUM = 3;
         private String[] mConfigurationValues = new String[CONFIG_NUM];
 
+        final String sqlCommit = "SET autocommit = 1";
         private QueryWrapper() {
             // getting server configuration values.
             getConfiguration();
@@ -550,9 +551,10 @@ public final class DataBaseManager extends SystemManagerBase {
          * @param endTime
          * @return
          */
-        public String addReservation(String id, String parkingFacility, String startTime,
+        public synchronized String addReservation(String id, String parkingFacility, String startTime,
                 String endTime) {
 
+        	
             final String sqlUser = "SELECT idx FROM tb_user WHERE id='" + id + "'";
             ResultSet resevedLotResult = null;
             ResultSet mResultSet3 = null;
@@ -644,9 +646,11 @@ public final class DataBaseManager extends SystemManagerBase {
                 mResultSet3 = mDataBaseConnectionManager.getStatement().executeQuery(sqlParkingidx);
                 mResultSet3.next();
                 
+                
                 final String sql = "INSERT into tb_reservation (tb_user_idx, start_time, end_time, tb_parkinglot_idx, confirm_id) VALUES('"
                         + _idx + "', '" + startTime + "', '" + endTime + "', '" + mResultSet3.getString("idx") + "', '" + _confirm_id + "')";
 
+                mDataBaseConnectionManager.getStatement().executeUpdate(sqlCommit);
                 mDataBaseConnectionManager.getStatement().executeUpdate(sql);
 
                 return _confirm_id;
@@ -720,7 +724,7 @@ public final class DataBaseManager extends SystemManagerBase {
          * @param facility
          * @param parkingLot
          */
-        public void setStartTimeToHistoyTable(String startTime, String confirmID, String facility, String parkingLot) {
+        public synchronized void setStartTimeToHistoyTable(String startTime, String confirmID, String facility, String parkingLot) {
 
             try {
 
@@ -735,6 +739,7 @@ public final class DataBaseManager extends SystemManagerBase {
                 final String sql = "INSERT into tb_history (tb_parkinglot_idx, start_time, confirm_id) VALUES('"
                         + parkinglot_idx + "', '" +startTime + "', '" + confirmID +"' )";
 
+                mDataBaseConnectionManager.getStatement().executeUpdate(sqlCommit);
                 mDataBaseConnectionManager.getStatement().executeUpdate(sql);
                 
                 Log.d(TAG, "insert new history "  + parkinglot_idx +" "+ startTime);
@@ -758,7 +763,7 @@ public final class DataBaseManager extends SystemManagerBase {
          * @param parkingLot
          * @return fee
          */
-        public long setEndTimeToHistoyTable(String endTime, String confirmID, String facility, String parkingLot) {
+        public synchronized long setEndTimeToHistoyTable(String endTime, String confirmID, String facility, String parkingLot) {
 
             try {
 
@@ -785,6 +790,7 @@ public final class DataBaseManager extends SystemManagerBase {
                 //delete reservation information from reservation table
                 final String sqlDelete = "DELETE FROM tb_reservation WHERE " + "confirm_id='"+ confirmID +"'" ;
                 
+                mDataBaseConnectionManager.getStatement().executeUpdate(sqlCommit);
                 mDataBaseConnectionManager.getStatement().executeUpdate(sqlDelete);
                 
                 return fee;
@@ -803,37 +809,58 @@ public final class DataBaseManager extends SystemManagerBase {
             
             return 0L;
         }
+
+        /**
+         * check grace period and remove column on the table
+         * @param gracePeriod
+         */
+    	public synchronized void checkGracePeriod(int gracePeriod) {
+    		
+    		Date date = new Date();
+    		
+    		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+    		Calendar c = Calendar.getInstance(); 
+    		c.setTime(date); 
+    		c.add(Calendar.MINUTE, gracePeriod);
+    		Date grace = c.getTime();
+
+    		final String strGrace = dateFormat.format(grace);
+    		
+    		Log.d(TAG, "Grace period " + strGrace);
+    		
+    		final String sql_set = "SET SQL_SAFE_UPDATES = 0";
+    		final String sql_delete = "DELETE FROM tb_reservation WHERE start_time < '" + strGrace +"' AND confirm_id NOT IN (SELECT f.confirm_id FROM tb_history f) ";
+
+    		try {
+    			mDataBaseConnectionManager.getStatement().executeUpdate(sqlCommit);
+    			mDataBaseConnectionManager.getStatement().executeUpdate(sql_set);
+    			mDataBaseConnectionManager.getStatement().executeUpdate(sql_delete);
+    		} catch (SQLException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
+    		
+    	}
+    	
+    	/**
+         * write log message
+         * @param gracePeriod
+         */
+    	public void log(String msg) {
+    		
+    		final String sql = "INSERT into tb_log (message) VALUES('" + msg + "' )";
+    		try {
+    			mDataBaseConnectionManager.getStatement().executeUpdate(sql);
+    		} catch (SQLException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
+    		
+    	}
     }
 
-    /**
-     * check grace period and remove column on the table
-     * @param gracePeriod
-     */
-	public void checkGracePeriod(int gracePeriod) {
-		
-		Date date = new Date();
-		
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-		Calendar c = Calendar.getInstance(); 
-		c.setTime(date); 
-		c.add(Calendar.MINUTE, gracePeriod);
-		Date grace = c.getTime();
-
-		final String strGrace = dateFormat.format(grace);
-		
-		Log.d(TAG, "Grace period " + strGrace);
-		
-		final String sql_set = "SET SQL_SAFE_UPDATES = 0";
-		final String sql_delete = "DELETE FROM tb_reservation WHERE start_time > '" + strGrace +"' AND confirm_id NOT IN (SELECT f.confirm_id FROM tb_history f) ";
-
-		try {
-			mDataBaseConnectionManager.getStatement().executeUpdate(sql_set);
-			mDataBaseConnectionManager.getStatement().executeUpdate(sql_delete);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
+   
+	
+	
 }
