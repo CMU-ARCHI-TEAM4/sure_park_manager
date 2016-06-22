@@ -55,7 +55,7 @@ public final class ChargeManager extends SystemManagerBase {
 			if (period <= 0) {
 				// ERROR, start time is bigger than end time
 				Log.e(TAG, "Error!! end time is bigger than start time");
-				return -1;
+				return 0;
 			}
 
 			long min = period / (1000 * 60);

@@ -33,9 +33,6 @@ public class Login extends HttpServlet {
     private LogManager lm = (LogManager) SystemManager.getInstance()
             .getManager(SystemManager.LOG_MANAGER);
 
-    private String captchaAnswer = "";
-    private int token = -1;
-
     public Login() {
         super();
         Log.d(TAG, "init");
@@ -56,21 +53,31 @@ public class Login extends HttpServlet {
         String otp = request.getParameter("otp");
 
         HttpSession session = request.getSession();
+        
+        String captchaAnswer = (String) session.getAttribute(WebSession.CAPTCH_ANSWER);
+        captchaAnswer = captchaAnswer == null ? "" : captchaAnswer;
+        
+        int optAnswer = -1;
+        if (session.getAttribute(WebSession.OPT_ANSWER) != null) {
+            optAnswer = ((Integer) session
+                    .getAttribute(WebSession.OPT_ANSWER)).intValue();
+        }
 
         if (captchaAnswer.equals(captchaUser)) {
             Log.d(TAG, "Equals Confirmed with captcha " + captchaAnswer);
         }
 
-        Log.d(TAG, "OTP  " + otp + "  TOKEN " + token);
+        Log.d(TAG, "OTP  " + otp + "  ANSWER " + optAnswer);
 
         if (dbm != null && dbm.getQueryWrapper().isLoginOk(id, pw)
                 && captchaAnswer.equals(captchaUser)
-                && (token == -1 || (otp != null && Integer.parseInt(otp) == token ))) {
+                && (optAnswer == -1 || (otp != null && Integer.parseInt(otp) == optAnswer ))) {
 
             Log.d(TAG, "Athorized user " + captchaAnswer);
 
             session.setAttribute(WebSession.SESSION_USERID, id);
             session.removeAttribute(WebSession.SESSION_LOGIN_FAILED_COUNT);
+            session.removeAttribute(WebSession.OPT_ANSWER);
 
             if ("attendant".equals(id)) {
                 lm.log(LogManager.ATTENDANT, LogManager.LOGIN);
@@ -112,13 +119,16 @@ public class Login extends HttpServlet {
                         session.setAttribute(WebSession.SESSION_LOGIN_FAILED_COUNT, failCount);
                     }
 
-                    printWriter.write(getLoginHtml("Login for Administrator"));
+                    printWriter.write(getLoginHtml("Login for Administrator", session));
                     Random rand = new Random();
-                    token = rand.nextInt((Integer.MAX_VALUE - 10000) + 1) + 10000;
-                    printWriter.write(getJsPrompt(token));
+                    optAnswer = rand.nextInt((Integer.MAX_VALUE - 10000) + 1) + 10000;
+                    printWriter.write(getJsPrompt(optAnswer));
+                    
+                    session.setAttribute(WebSession.OPT_ANSWER, optAnswer);
 
                 } else {
-                    printWriter.write(getLoginHtml("Login for Driver"));
+                    optAnswer = -1; // initialize token
+                    printWriter.write(getLoginHtml("Login for Driver", session));
                 }
 
                 printWriter.write(Html.getHtmlFooter());
@@ -138,7 +148,7 @@ public class Login extends HttpServlet {
         doGet(request, response);
     }
 
-    private String makeCaptcha() {
+    private String makeCaptcha(HttpSession session) {
 
         Captcha captcha = new Captcha.Builder(120, 50).addText()
                 .addBackground(new GradiatedBackgroundProducer()).addNoise()
@@ -157,13 +167,13 @@ public class Login extends HttpServlet {
         byte[] base64bytes = Base64.getEncoder().encode(bytes);
         String src = "data:image/png;base64," + new String(base64bytes);
 
-        captchaAnswer = captcha.getAnswer();
+        session.setAttribute(WebSession.CAPTCH_ANSWER, captcha.getAnswer());
         return src;
     }
 
-    private String getLoginHtml(String title) {
+    private String getLoginHtml(String title, HttpSession session) {
 
-        final String captcha = makeCaptcha();
+        final String captcha = makeCaptcha(session);
         String html = "";
         String action = "";
         String image = "";
