@@ -171,7 +171,7 @@ public class Reservation extends HttpServlet {
 		List<String> facilities = getListOfFacility();
 		
 		//default facility
-		String facility = facilities.get(0);
+		String facility = facilities.size() >0 ? facilities.get(0) : "";
 		
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
