@@ -87,12 +87,12 @@ public class InfoProvider extends HttpServlet implements CommandManager.CommandL
                     + " FROM tb_controller WHERE name='" + pfName + "'";
             rs = SystemManager.getInstance().getDataBaseManager().getStatement().executeQuery(sql);
             while (rs.next()) {
-                rspStr += " " + rs.getString("entry_gate");
-                rspStr += " " + rs.getString("exit_gate");
-                rspStr += " " + rs.getString("parkinglot_num");
+                rspStr += "#" + rs.getString("entry_gate");
+                rspStr += "#" + rs.getString("exit_gate");
+                rspStr += "#" + rs.getString("parkinglot_num");
             }
-            rspStr += " " + (mIsArrivedEntryGate ? 1 : 0);
-            rspStr += " " + pfs;
+            rspStr += "#" + (mIsArrivedEntryGate ? 1 : 0);
+            rspStr += "#" + pfs;
             Log.d(TAG, rspStr);
             printWriter.write(rspStr);
         } catch (Exception e) {

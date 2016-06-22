@@ -11,12 +11,12 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import com.lge.sureparkmanager.utils.Log;
+import com.lge.sureparkmanager.utils.Utils;
 
 public final class NetworkManager extends SystemManagerBase {
     private static final String TAG = NetworkManager.class.getSimpleName();
 
     private ArrayList<SocketObject> mSocketObjects = new ArrayList<SocketObject>();
-
     private DataBaseManager mDataBaseManager;
 
     public NetworkManager() {
@@ -61,11 +61,28 @@ public final class NetworkManager extends SystemManagerBase {
         }
     }
 
+    private String generateResponseMessage(String msg) {
+        String[] cmds = msg.split(Utils.COMMAND_SEPARATOR);
+
+        if (Integer.parseInt(cmds[0]) == Commands.CMD_RES) {
+            switch (Integer.parseInt(cmds[2])) {
+            case Commands.CMD_TIME_SYNC: {
+                return msg + " " + Utils.getCurrentDateTime(Utils.DEVICE_SYNC_TIME_FORMAT);
+            }
+            default: {
+                break;
+            }
+            }
+        }
+
+        return msg;
+    }
+
     private void sendMessageToTarget(SocketObject so, String msg) {
         for (SocketObject s : mSocketObjects) {
             if (Objects.equals(s, so)) {
                 s.mMacAddr = msg.split(" ")[1];
-                s.mSender.sendMessageToClient(msg);
+                s.mSender.sendMessageToClient(generateResponseMessage(msg));
                 return;
             }
         }
@@ -136,7 +153,9 @@ public final class NetworkManager extends SystemManagerBase {
             if (mOut != null) {
                 final SocketObject so = getSocketObject(this);
                 try {
-                    Log.d(TAG, "sendMessageToClient: " + msg);
+                    msg += Utils.COMMAND_LAST_CHAR;
+                    Log.d(TAG, Commands.getCmdName(Integer.parseInt(
+                            msg.split(Utils.COMMAND_SEPARATOR)[2])) + " " + "send: " + msg);
                     mOut.write(msg);
                     mOut.flush();
                 } catch (IOException e) {
@@ -183,7 +202,8 @@ public final class NetworkManager extends SystemManagerBase {
 
             try {
                 while ((line = mIn.readLine()) != null) {
-                    Log.d(TAG, line);
+                    Log.d(TAG, Commands.getCmdName(Integer.parseInt(
+                            line.split(Utils.COMMAND_SEPARATOR)[2])) + " " + "recv: " + line);
 
                     if (line.startsWith(String.valueOf(Commands.CMD_REQ))) {
                         SystemManager.getInstance().getCommandQueue().put(line);

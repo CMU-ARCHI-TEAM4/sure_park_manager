@@ -1,5 +1,7 @@
 package com.lge.sureparkmanager.manager;
 
+import java.util.Objects;
+
 import com.lge.sureparkmanager.utils.Log;
 import com.lge.sureparkmanager.utils.Utils;
 
@@ -29,19 +31,27 @@ public final class CommandDispatcher {
         mDataBaseManager.getQueryWrapper().setParkExitGateInfo(mac, status);
     }
 
-    public void setParkStatusInfo(String mac, String status, String parkingLotNum, String charging,
+    public void setParkStatusInfo(String mac, String status, String parkingLotIdx, String charging,
             String confirmId) {
         int st = Integer.parseInt(status);
         final String parkingFacilityName = mDataBaseManager.getQueryWrapper()
                 .getParkingFacilityName(mac);
-        final String parkingLotName = Utils.getParkingLotName(parkingFacilityName, parkingLotNum);
+        final String parkingLotName = Utils.getParkingLotName(parkingFacilityName, parkingLotIdx);
 
         if (st == Commands.CMD_PARKING_IN) {
-            mChargeManager.checkIn(confirmId, parkingFacilityName, parkingLotNum);
+            final String reservedParkingLotName = mDataBaseManager.getQueryWrapper()
+                    .getReservationParkingLotName(confirmId);
+
+            // Reallocation!!!
+            if (!Objects.equals(parkingLotName, reservedParkingLotName)) {
+                mDataBaseManager.getQueryWrapper().reallocationParkingLot(confirmId,
+                        reservedParkingLotName, parkingLotName);
+            }
+            mChargeManager.checkIn(confirmId, parkingFacilityName, parkingLotIdx);
         } else {
             mChargeManager.checkOut(confirmId,
                     mDataBaseManager.getQueryWrapper().getCurrentUserId(parkingLotName),
-                    parkingFacilityName, parkingLotNum);
+                    parkingFacilityName, parkingLotIdx);
         }
 
         mDataBaseManager.getQueryWrapper().setParkStatusInfo(status, parkingLotName, charging);

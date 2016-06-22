@@ -109,6 +109,16 @@ public class ParkingFacilityDetail extends HttpServlet {
         String html = "";
 
         html += "<script type='text/javascript'>";
+        html += "function getDateTimeSince(diff) {var timeDiff = (diff) / 1000;";
+        html += "var seconds = Math.round(timeDiff % 60);timeDiff = Math.floor(timeDiff / 60);";
+        html += "var minutes = Math.round(timeDiff % 60);timeDiff = Math.floor(timeDiff / 60);";
+        html += "var hours = Math.round(timeDiff % 24);timeDiff = Math.floor(timeDiff / 24);";
+        html += "var days = timeDiff;var elapsed = \"\";";
+        html += "elapsed += ((days > 0) ? days : \"00\") + \" days</br>\";";
+        html += "elapsed += ((hours > 0) ? (hours < 10) ? \"0\" + hours : hours : \"00\") + \":\";";
+        html += "elapsed += ((minutes > 0) ? (minutes < 10) ? \"0\" + minutes : minutes : \"00\");";
+        html += "return elapsed;}";
+
         html += "var myVar = setInterval(getInfo, 1000);";
         html += "function getInfo() {";
         html += "var xhr = new XMLHttpRequest();";
@@ -117,7 +127,7 @@ public class ParkingFacilityDetail extends HttpServlet {
         html += "xhr.send();";
         html += "xhr.onreadystatechange = function() {";
         html += "if (xhr.readyState == 4 && xhr.status == 200) {";
-        html += "var data = xhr.responseText.split(\" \");";
+        html += "var data = xhr.responseText.split(\"#\");";
         html += "alive = data[0];entry_gate = data[1];exit_gate = data[2];parkinglot_num = data[3];";
         html += "isArrivedEntryGate = data[4];";
         html += "var parkinglot_status = data[5].split(\"^\");";
@@ -137,7 +147,9 @@ public class ParkingFacilityDetail extends HttpServlet {
         html += "document.getElementById(\"exit_gate\").innerHTML = h;";
         html += "for (i = 0; i < parkinglot_num; i++) {";
         html += "var e = parkinglot_status[i].split(\":\");";
-        html += "if (e[1] == 1) {document.getElementById(e[0]).innerHTML = e[0] + \"</br><font color='red'>full</font>\";";
+        html += "if (e[1] == 1) {document.getElementById(e[0]).innerHTML = e[0] + \"</br>";
+        html += "<font color='red'>full</font></br>\"";
+        html += "+ getDateTimeSince(e[2])";
         html += "} else {document.getElementById(e[0]).innerHTML = e[0] + \"</br><font color='yellow'>empty</font>\";";
         html += "}}}}}</script>";
 

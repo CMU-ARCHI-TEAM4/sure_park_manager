@@ -6,8 +6,8 @@ body {
     color: #777;
 }
     body * {
-        margin: 10px;
-        padding: 10px;
+        margin: 5px;
+        padding: 5px;
         font-family: helvetica, sans-serif;
     }
 p {
@@ -158,6 +158,7 @@ input[type=radio]:checked {
 .centerTable {
 	margin: 0px auto;
 	border-color: white;
+	padding: 0px
 }
 .parking_facility_detail_table {
 	margin: 0px auto;

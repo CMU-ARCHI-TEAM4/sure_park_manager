@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.lge.sureparkmanager.db.UserInformation;
 import com.lge.sureparkmanager.utils.Log;
 
 /**
@@ -150,6 +149,6 @@ public final class ChargeManager extends SystemManagerBase {
 		final long fee = dbm.getQueryWrapper().setEndTimeToHistoyTable(current, confirmID, facility, parkingLot);
 
 		UserInformation userInfo = dbm.getQueryWrapper().getUserInfomation(userID);
-        requestCharge(userInfo.getCreditCardNumber(), userInfo.getCreditCardValidation(), fee);
-    }
+		requestCharge(userInfo.getCreditCardNumber(), userInfo.getCreditCardValidation(), fee);
+	}
 }

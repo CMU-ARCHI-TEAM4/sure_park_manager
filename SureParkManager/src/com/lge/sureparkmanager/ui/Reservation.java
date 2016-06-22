@@ -16,9 +16,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.lge.sureparkmanager.db.UserInformation;
 import com.lge.sureparkmanager.manager.DataBaseManager;
 import com.lge.sureparkmanager.manager.SystemManager;
+import com.lge.sureparkmanager.manager.UserInformation;
 import com.lge.sureparkmanager.utils.Html;
 import com.lge.sureparkmanager.utils.Log;
 
