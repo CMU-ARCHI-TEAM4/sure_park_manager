@@ -154,8 +154,8 @@ public final class NetworkManager extends SystemManagerBase {
                 final SocketObject so = getSocketObject(this);
                 try {
                     msg += Utils.COMMAND_LAST_CHAR;
-                    Log.d(TAG, Commands.getCmdName(Integer.parseInt(
-                            msg.split(Utils.COMMAND_SEPARATOR)[2])) + " " + "send: " + msg);
+                    Log.d(TAG, /*Commands.getCmdName(Integer.parseInt(
+                            msg.split(Utils.COMMAND_SEPARATOR)[2])) + " " + */"send: " + msg);
                     mOut.write(msg);
                     mOut.flush();
                 } catch (IOException e) {
@@ -202,8 +202,8 @@ public final class NetworkManager extends SystemManagerBase {
 
             try {
                 while ((line = mIn.readLine()) != null) {
-                    Log.d(TAG, Commands.getCmdName(Integer.parseInt(
-                            line.split(Utils.COMMAND_SEPARATOR)[2])) + " " + "recv: " + line);
+                    Log.d(TAG, /*Commands.getCmdName(Integer.parseInt(
+                            line.split(Utils.COMMAND_SEPARATOR)[2])) + " " + */"recv: " + line);
 
                     if (line.startsWith(String.valueOf(Commands.CMD_REQ))) {
                         SystemManager.getInstance().getCommandQueue().put(line);

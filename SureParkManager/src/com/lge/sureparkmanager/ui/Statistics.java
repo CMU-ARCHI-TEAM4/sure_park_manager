@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -49,7 +51,7 @@ public class Statistics extends HttpServlet {
         }
 
         mSelectedYear = request.getParameter("year");
-        mSelectedMonth= request.getParameter("month");
+        mSelectedMonth = request.getParameter("month");
 
         if (mSelectedYear != null && mSelectedYear.length() > 0
                 && mSelectedMonth != null & mSelectedMonth.length() > 0) {
@@ -57,8 +59,8 @@ public class Statistics extends HttpServlet {
             final String lastTime = Utils.getLastTime(mSelectedYear, mSelectedMonth);
             final String sql = "SELECT name, SUM(fee) AS fee FROM tb_history INNER JOIN "
                     + "tb_parkinglot ON tb_parkinglot_idx=tb_parkinglot.idx "
-                    + "WHERE start_time >= '" + firstTime + "' AND "
-                    + "end_time <= '" + lastTime + "' GROUP BY name ORDER BY name ASC";
+                    + "WHERE start_time >= '" + firstTime + "' AND " + "end_time <= '" + lastTime
+                    + "' GROUP BY name ORDER BY name ASC";
 
             ResultSet rs = null;
             Map<String, String> map = new HashMap<String, String>();
@@ -176,11 +178,28 @@ public class Statistics extends HttpServlet {
 
         String dataXml = "";
         int totalSales = 0;
-        for (Map.Entry<String, String> e : mMonthlySales.entrySet()) {
-            final String v = e.getValue();
-            totalSales += Integer.parseInt(v);
-            dataXml += "<set name='" + e.getKey() + "' value='" + e.getValue() + "' color='"
-                    + Utils.generateColor(new Random()) + "' />";
+        ArrayList<String> totalParkingLotName = mDataBaseManager.getQueryWrapper()
+                .getTotalParkingLotName();
+        for (String s : totalParkingLotName) {
+            String value = "";
+            for (Map.Entry<String, String> e : mMonthlySales.entrySet()) {
+                if (Objects.equals(s, e.getKey())) {
+                    value = e.getValue();
+                    break;
+                }
+            }
+            if ("".equals(value)) {
+                dataXml += "<set name='" + s + "' value='0' color='"
+                        + Utils.generateColor(new Random()) + "' />";
+            } else {
+                int v = 0;
+                if (Integer.parseInt(value) > 0) {
+                    v = Integer.parseInt(value);
+                }
+                totalSales += v;
+                dataXml += "<set name='" + s + "' value='" + v + "' color='"
+                        + Utils.generateColor(new Random()) + "' />";
+            }
         }
 
         String xml = "<graph caption='Monthly sales $" + totalSales

@@ -63,79 +63,83 @@ public final class CommandManager extends SystemManagerBase {
             throw new CommandParserException("data is null");
         }
 
-        final String[] cmds = data.split(Utils.COMMAND_SEPARATOR);
-        final int first = Integer.parseInt(cmds[0]);
-        switch (first) {
-        case Commands.CMD_REQ:
-            break;
-        case Commands.CMD_RES:
-            break;
-        default:
-            break;
-        }
-        final String macAddr = cmds[1];
-
-        for (int i = 2; i < cmds.length; i++) {
-            final String cmd = cmds[2];
-            final int c = Integer.parseInt(cmd);
-            int subCmd = -1;
-
-            switch (c) {
-            case Commands.CMD_DEVICE_INFO: {
-                final String mac = cmds[++i];
-                final int parkingLotNum = Integer.parseInt(cmds[++i]);
-                if (macAddr.equals(mac)) {
-                    mCommandDispatcher.setDeviceInfo(macAddr, parkingLotNum);
-                }
+        try {
+            final String[] cmds = data.split(Utils.COMMAND_SEPARATOR);
+            final int first = Integer.parseInt(cmds[0]);
+            switch (first) {
+            case Commands.CMD_REQ:
                 break;
-            }
-            case Commands.CMD_ENTRY_GATE: {
-                String status = cmds[++i];
-                mCommandDispatcher.setParkEntryGateInfo(macAddr, status);
+            case Commands.CMD_RES:
                 break;
-            }
-            case Commands.CMD_EXIT_GATE: {
-                String status = cmds[++i];
-                mCommandDispatcher.setParkExitGateInfo(macAddr, status);
-                break;
-            }
-            case Commands.CMD_PARKING: {
-                String status = cmds[++i];
-                String parkingLotIdx = cmds[++i];
-                String charging = cmds[++i];
-                String confirmId = cmds[++i];
-                mCommandDispatcher.setParkStatusInfo(macAddr, status, parkingLotIdx, charging,
-                        confirmId);
-                break;
-            }
-            case Commands.CMD_HEART_BIT: {
-                @SuppressWarnings("unused")
-                String time = cmds[++i];
-                AliveCheckerManager acm = (AliveCheckerManager) SystemManager.getInstance()
-                        .getManager(SystemManager.ALIVE_CHECKER_MANAGER);
-                acm.createAliveChecker(macAddr);
-                acm.kick(macAddr, System.currentTimeMillis());
-                break;
-            }
-            case Commands.CMD_ENTRY_SENSOR: {
-                @SuppressWarnings("unused")
-                int status = subCmd = Integer.parseInt(cmds[++i]);
-                break;
-            }
-            case Commands.CMD_EXIT_SENSOR: {
-                @SuppressWarnings("unused")
-                int status = subCmd = Integer.parseInt(cmds[++i]);
-                break;
-            }
-            case Commands.CMD_TIME_SYNC: {
-                // Do nothing.
-                break;
-            }
             default:
                 break;
             }
-            // Don't call me, we will call you.
-            onCommand(macAddr, c, subCmd);
+            final String macAddr = cmds[1];
+    
+            for (int i = 2; i < cmds.length; i++) {
+                final String cmd = cmds[2];
+                final int c = Integer.parseInt(cmd);
+                int subCmd = -1;
+    
+                switch (c) {
+                case Commands.CMD_DEVICE_INFO: {
+                    final String mac = cmds[++i];
+                    final int parkingLotNum = Integer.parseInt(cmds[++i]);
+                    if (macAddr.equals(mac)) {
+                        mCommandDispatcher.setDeviceInfo(macAddr, parkingLotNum);
+                    }
+                    break;
+                }
+                case Commands.CMD_ENTRY_GATE: {
+                    String status = cmds[++i];
+                    mCommandDispatcher.setParkEntryGateInfo(macAddr, status);
+                    break;
+                }
+                case Commands.CMD_EXIT_GATE: {
+                    String status = cmds[++i];
+                    mCommandDispatcher.setParkExitGateInfo(macAddr, status);
+                    break;
+                }
+                case Commands.CMD_PARKING: {
+                    String status = cmds[++i];
+                    String parkingLotIdx = cmds[++i];
+                    String charging = cmds[++i];
+                    String confirmId = cmds[++i];
+                    mCommandDispatcher.setParkStatusInfo(macAddr, status, parkingLotIdx, charging,
+                            confirmId);
+                    break;
+                }
+                case Commands.CMD_HEART_BIT: {
+                    @SuppressWarnings("unused")
+                    String time = cmds[++i];
+                    AliveCheckerManager acm = (AliveCheckerManager) SystemManager.getInstance()
+                            .getManager(SystemManager.ALIVE_CHECKER_MANAGER);
+                    acm.createAliveChecker(macAddr);
+                    acm.kick(macAddr, System.currentTimeMillis());
+                    break;
+                }
+                case Commands.CMD_ENTRY_SENSOR: {
+                    @SuppressWarnings("unused")
+                    int status = subCmd = Integer.parseInt(cmds[++i]);
+                    break;
+                }
+                case Commands.CMD_EXIT_SENSOR: {
+                    @SuppressWarnings("unused")
+                    int status = subCmd = Integer.parseInt(cmds[++i]);
+                    break;
+                }
+                case Commands.CMD_TIME_SYNC: {
+                    // Do nothing.
+                    break;
+                }
+                default:
+                    break;
+                }
+                // Don't call me, we will call you.
+                onCommand(macAddr, c, subCmd);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

@@ -44,6 +44,7 @@ public final class CommandDispatcher {
 
             // Reallocation!!!
             if (!Objects.equals(parkingLotName, reservedParkingLotName)) {
+                Log.d(TAG, "reallocation: " + reservedParkingLotName + " " + parkingLotName);
                 mDataBaseManager.getQueryWrapper().reallocationParkingLot(confirmId,
                         reservedParkingLotName, parkingLotName);
             }
