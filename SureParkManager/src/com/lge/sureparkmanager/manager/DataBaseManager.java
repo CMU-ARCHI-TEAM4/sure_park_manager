@@ -450,9 +450,9 @@ public final class DataBaseManager extends SystemManagerBase {
                 String idx = idxs.get(i);
                 String name = names.get(i);
                 String stat = status.get(i);
-                sql = "SELECT start_time FROM sure_park_system.tb_history WHERE tb_parkinglot_idx='"
-                        + idx + "' AND start_time IS NOT NULL AND end_time IS NULL "
-                        + "ORDER BY idx DESC LIMIT 1";
+                sql = "SELECT start_time FROM tb_history WHERE tb_parkinglot_idx='" + idx
+                        + "' AND start_time IS NOT NULL AND end_time IS NULL "
+                        + "ORDER BY idx LIMIT 1";
                 String rslt = null;
                 try {
                     mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
@@ -470,6 +470,31 @@ public final class DataBaseManager extends SystemManagerBase {
                         }
                     }
                 }
+
+                int gracePeriod = getGracePeriodTime();
+                String curTime = Utils.getCurrentDateTime(Utils.DATE_FORMAT);
+                String gracePeriodTime = Utils.getCurrentTimeSubMins(gracePeriod);
+                sql = "SELECT idx FROM tb_reservation WHERE tb_parkinglot_idx='" + idx
+                        + "' AND start_time <= '" + curTime + "' AND start_time"
+                        + " >= '" + gracePeriodTime + "'";
+                String rslt2 = null;
+                try {
+                    mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
+                    while (mResultSet.next()) {
+                        rslt2 = mResultSet.getString("idx");
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (mResultSet != null) {
+                        try {
+                            mResultSet.close();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
                 rsp += name + ":" + stat + ":";
                 if (rslt == null || "0".equals(stat)) {
                     rsp += "0";
@@ -483,6 +508,7 @@ public final class DataBaseManager extends SystemManagerBase {
                     }
                     rsp += diff;
                 }
+                rsp += ":" + ((rslt2 == null) ? 0 : 1);
                 rsp += "^";
             }
 

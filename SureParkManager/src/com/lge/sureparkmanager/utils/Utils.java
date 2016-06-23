@@ -3,6 +3,7 @@ package com.lge.sureparkmanager.utils;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Random;
@@ -114,5 +115,12 @@ public class Utils {
             n >>= 4;
         }
         return new String(s);
+    }
+
+    public static String getCurrentTimeSubMins(int sub) {
+        SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MINUTE, -(sub));
+        return df.format(cal.getTime());
     }
 }

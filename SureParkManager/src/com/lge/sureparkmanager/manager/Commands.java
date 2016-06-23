@@ -70,15 +70,3 @@ public final class Commands {
         return "";
     }
 }
-
-/*
- * cmd value P1(string) P2 P3 Request 0 Response 1
- * 
- * Device Info 0 MacAddr Parking place Server config 1 TBD HeartBeat 2 Time info
- * Entry sensor 3 Det(0)/NotDet(1) Confirmation 4 TBD Entry gate 5
- * open(0)/close(1) Parking 6 In(1)/Out(0) ParkingPlace charging time Exit gate
- * 7 open(0)/close(1)
- * 
- * 
- * 0_5_0 request open entry gate 1_5_0 server response
- */

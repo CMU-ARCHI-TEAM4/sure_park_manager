@@ -32,6 +32,8 @@ public class Login extends HttpServlet {
 
     private LogManager lm = (LogManager) SystemManager.getInstance()
             .getManager(SystemManager.LOG_MANAGER);
+    DataBaseManager dbm = (DataBaseManager) SystemManager.getInstance()
+            .getManager(SystemManager.DATABASE_MANAGER);
 
     public Login() {
         super();
@@ -40,17 +42,13 @@ public class Login extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         final StringBuffer requestUrl = request.getRequestURL();
-
-        request.setCharacterEncoding("euc-kr");
-        DataBaseManager dbm = (DataBaseManager) SystemManager.getInstance()
-                .getManager(SystemManager.DATABASE_MANAGER);
-
         String id = request.getParameter("id");
         String pw = request.getParameter("passwd");
         String captchaUser = request.getParameter("captcha");
         String otp = request.getParameter("otp");
+
+        request.setCharacterEncoding("euc-kr");
 
         HttpSession session = request.getSession();
 
@@ -101,13 +99,11 @@ public class Login extends HttpServlet {
                 printWriter.write(getJsInputCheckSubmit("action_login"));
 
                 if (requestUrl.toString().contains("ad_login")) {
-
                     int failCount = 0;
                     if (session.getAttribute(WebSession.SESSION_LOGIN_FAILED_COUNT) != null) {
                         failCount = ((Integer) session
                                 .getAttribute(WebSession.SESSION_LOGIN_FAILED_COUNT)).intValue();
                     }
-                    ;
 
                     failCount++;
                     if (failCount > MAX_FAIL) {
@@ -196,14 +192,13 @@ public class Login extends HttpServlet {
         html += "<tr><td colspan='3' align='center'>";
         html += image;
         html += "</td></tr><tr><td align='center'>ID</td>";
-        html += "<td><input type='text' name='id' id='id' size='20' /></td>";
+        html += "<td><input type='text' name='id' id='id' maxlength='20' /></td>";
         html += "</tr><tr><td align='center'>PW</td>";
-        html += "<td><input type='password' name='passwd' id='passwd' size='20' /></td></tr>";
+        html += "<td><input type='password' name='passwd' id='passwd' maxlength='20' /></td></tr>";
         if (title.contains("Administrator")) {
             html += "</tr><tr><td align='center'>OTP TOKEN</td>";
-            html += "<td><input type='text' name='otp' id='otp' size='20' /></td>";
-            html += "<td><a href='javascript:sendSMS();'><input type='button' value='OTP'/></a></td>";
-
+            html += "<td><input type='text' name='otp' id='otp' maxlength='9' ";
+            html += "onkeypress='return event.charCode >= 48 && event.charCode <= 57'/></td>";
         }
         html += "<tr><td><img alt='lg twins' src='" + captcha + "' /></td>";
         html += "<td><input type='text' name='captcha' id='captcha' /></tr>";
@@ -223,6 +218,7 @@ public class Login extends HttpServlet {
         html += "return; }";
         html += "if(document.getElementById('id').value == '') { alert('Please input id.'); return; }";
         html += "if(document.getElementById('passwd').value == '') { alert('Please input password.'); return; }";
+        html += "if(document.getElementById('captcha').value == '') { alert('Please input random character.'); return; }";
         html += "document." + formName + ".submit(); } </script>";
         return html;
     }

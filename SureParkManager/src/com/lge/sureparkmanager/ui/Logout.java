@@ -49,7 +49,7 @@ public class Logout extends HttpServlet {
         } else {
             lm.log(LogManager.DRIVER, LogManager.LOGOUT + "/" + sessionUserId);
         }
-
+        
         response.sendRedirect("welcome.html");
     }
 

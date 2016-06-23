@@ -6,10 +6,8 @@ package com.lge.sureparkmanager.manager;
  *
  */
 public final class GracePeriodExpirer extends SystemManagerBase {
-
+    //private static final String TAG = GracePeriodExpirer.class.getSimpleName();
     private final static int PERIOD = 60 * 1000;
-
-    // private static final String TAG = ChargeManager.class.getSimpleName();
     private DataBaseManager dbm = (DataBaseManager) SystemManager.getInstance()
             .getManager(SystemManager.DATABASE_MANAGER);
 

@@ -65,13 +65,13 @@ public class InfoProvider extends HttpServlet implements CommandManager.CommandL
         AliveCheckerManager acm = (AliveCheckerManager) SystemManager.getInstance()
                 .getManager(SystemManager.ALIVE_CHECKER_MANAGER);
 
-        String rspStr = acm.isAlive(mac) ? "1" : "0";
-
         //Log.d(TAG, "doGet: " + pfName);
 
-        if (pfName == null || pfName.length() == 0) {
+        if (pfName == null || pfName.length() == 0 || acm == null) {
             Html.executeJsGoBack(response);
         }
+
+        String rspStr = acm.isAlive(mac) ? "1" : "0";
 
         response.setContentType("text/plain");
         response.setCharacterEncoding("UTF-8");

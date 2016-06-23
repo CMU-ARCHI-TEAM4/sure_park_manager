@@ -188,7 +188,7 @@ public class Statistics extends HttpServlet {
                     break;
                 }
             }
-            if ("".equals(value)) {
+            if ("".equals(value) || Integer.parseInt(value) < 1) {
                 dataXml += "<set name='" + s + "' value='0' color='"
                         + Utils.generateColor(new Random()) + "' />";
             } else {
@@ -203,8 +203,8 @@ public class Statistics extends HttpServlet {
         }
 
         String xml = "<graph caption='Monthly sales $" + totalSales
-                + "' xAxisName='Month' yAxisName='Sales' ";
-        xml += "decimalPrecision='0' formatNumberScale='0'>";
+                + "' xAxisName='Month' yAxisName='Sales' yAxisMaxValue='100'";
+        xml += "decimalPrecision='0' formatNumberScale='0' numberPrefix='$'>";
         xml += dataXml;
         xml += "</graph>";
 

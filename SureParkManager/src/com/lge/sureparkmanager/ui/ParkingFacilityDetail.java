@@ -149,9 +149,11 @@ public class ParkingFacilityDetail extends HttpServlet {
         html += "var e = parkinglot_status[i].split(\":\");";
         html += "if (e[1] == 1) {document.getElementById(e[0]).innerHTML = e[0] + \"</br>";
         html += "<font color='red'>full</font></br>\"";
-        html += "+ getDateTimeSince(e[2])";
+        html += "+ getDateTimeSince(e[2]);";
+        html += "document.getElementById(e[0]).style.backgroundColor='transparent';";
         html += "} else {document.getElementById(e[0]).innerHTML = e[0] + \"</br><font color='yellow'>empty</font>\";";
-        html += "}}}}}</script>";
+        html += "if(e[3] == 1)document.getElementById(e[0]).style.backgroundColor='#33ffff';";
+        html += "else document.getElementById(e[0]).style.backgroundColor='transparent';}}}}}</script>";
 
         return html;
     }
