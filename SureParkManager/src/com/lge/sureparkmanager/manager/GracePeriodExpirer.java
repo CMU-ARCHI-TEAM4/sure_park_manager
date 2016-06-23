@@ -14,8 +14,6 @@ public final class GracePeriodExpirer extends SystemManagerBase {
 	private static final String TAG = ChargeManager.class.getSimpleName();
 	private DataBaseManager dbm = (DataBaseManager)SystemManager.getInstance().getManager(
 	        SystemManager.DATABASE_MANAGER);
-	private static final int GRACE_PERIOD= ((ConfigurationManager)(SystemManager.getInstance().getManager(SystemManager.CONFIGURATION_MANAGER))).getConfigGracePeriodTime();
-			
 	
 	/**
 	 * Initialize the manager.
@@ -38,8 +36,9 @@ public final class GracePeriodExpirer extends SystemManagerBase {
             while (true) {
                 
             	// check db
-            	Log.d(TAG, "GracePeriodExpirer is running");
-            	
+            	// Log.d(TAG, "GracePeriodExpirer is running");
+            	int GRACE_PERIOD = ((ConfigurationManager)(SystemManager.getInstance().getManager(SystemManager.CONFIGURATION_MANAGER))).getConfigGracePeriodTime();
+                
             	dbm.getQueryWrapper().checkGracePeriod(GRACE_PERIOD);
                 try {
                     Thread.sleep(PERIOD);
