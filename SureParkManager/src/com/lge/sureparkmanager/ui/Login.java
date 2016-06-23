@@ -62,16 +62,16 @@ public class Login extends HttpServlet {
             useOtp = true;
         }
 
-        if (captchaAnswer.equals(captchaUser)) {
-            Log.d(TAG, "Equals Confirmed with captcha " + captchaAnswer);
+        Log.d(TAG, "captcha: " + captchaUser + " captchaAnswer: " + captchaAnswer);
+        Log.d(TAG, "OTP: " + otp + " ANSWER: " + optAnswer);
+
+        boolean loginOk = false;
+        if (id == null || (dbm != null && dbm.getQueryWrapper().isLoginOk(id, pw))) {
+            loginOk = true;
         }
 
-        Log.d(TAG, "OTP  " + otp + "  ANSWER " + optAnswer);
-
-        if (dbm != null && dbm.getQueryWrapper().isLoginOk(id, pw)
-                && captchaAnswer.equals(captchaUser)
+        if (loginOk && captchaAnswer.equals(captchaUser)
                 && (useOtp == false || (otp != null && Integer.parseInt(otp) == optAnswer))) {
-
             Log.d(TAG, "Athorized user " + captchaAnswer);
 
             session.setAttribute(WebSession.SESSION_USERID, id);
@@ -90,7 +90,6 @@ public class Login extends HttpServlet {
                 response.sendRedirect("reservation");
             }
         } else {
-
             PrintWriter printWriter = null;
             try {
                 printWriter = response.getWriter();
@@ -105,11 +104,12 @@ public class Login extends HttpServlet {
                                 .getAttribute(WebSession.SESSION_LOGIN_FAILED_COUNT)).intValue();
                     }
 
-                    failCount++;
-                    if (failCount > MAX_FAIL) {
-                        // notify through ssm
-                        lm.log(LogManager.OWNER,
-                                LogManager.UNATHORIZED_LOGIN_DETECTED + " / " + id != null ? id.toUpperCase() : "UNKNOWN");
+                    if (!loginOk) {
+                        failCount++;
+                    }
+                    if (failCount >= MAX_FAIL) {
+                        lm.log(LogManager.OWNER, LogManager.UNATHORIZED_LOGIN_DETECTED + " / "
+                                + (id != null ? id.toUpperCase() : "UNKNOWN"));
                         printWriter.write(getJsAlert());
                         session.removeAttribute(WebSession.SESSION_LOGIN_FAILED_COUNT);
                     } else {
@@ -124,7 +124,6 @@ public class Login extends HttpServlet {
                     printWriter.write(getJsPrompt(optAnswer));
 
                     session.setAttribute(WebSession.OPT_ANSWER, optAnswer);
-
                 } else {
                     session.removeAttribute(WebSession.OPT_ANSWER);
                     printWriter.write(getLoginHtml("Login for Driver", session));
@@ -148,7 +147,6 @@ public class Login extends HttpServlet {
     }
 
     private String makeCaptcha(HttpSession session) {
-
         Captcha captcha = new Captcha.Builder(120, 50).addText()
                 .addBackground(new GradiatedBackgroundProducer()).addNoise()
                 // .gimp(new DropShadowGimpyRenderer())
@@ -171,13 +169,13 @@ public class Login extends HttpServlet {
     }
 
     private String getLoginHtml(String title, HttpSession session) {
-
         final String captcha = makeCaptcha(session);
         String html = "";
         String action = "";
         String image = "";
         String tableWidth = "500";
-        
+
+        html += "<h1 class=\"center\">" + title + "</h1>";
         if (title.contains("Administrator")) {
             action = "<form action='ad_login' name='action_login' method='post'>";
             image = "<img src='images/lattanze.jpg' />";
@@ -188,7 +186,7 @@ public class Login extends HttpServlet {
         }
 
         html += action;
-        html += "<table class='centerTable' width='" + tableWidth +"'>";
+        html += "<table class='centerTable' width='" + tableWidth + "'>";
         html += "<tr><td colspan='3' align='center'>";
         html += image;
         html += "</td></tr><tr><td align='center'>ID</td>";
@@ -197,7 +195,7 @@ public class Login extends HttpServlet {
         html += "<td><input type='password' name='passwd' id='passwd' maxlength='20' /></td></tr>";
         if (title.contains("Administrator")) {
             html += "</tr><tr><td align='center'>OTP TOKEN</td>";
-             html += "<td><input type='text' name='otp' id='otp' maxlength='9' ";
+            html += "<td><input type='text' name='otp' id='otp' maxlength='10' ";
             html += "onkeypress='return event.charCode >= 48 && event.charCode <= 57'/></td>";
             html += "<td><a href='javascript:sendSMS();'><input type='button' value='OTP'/></a></td>";
 
