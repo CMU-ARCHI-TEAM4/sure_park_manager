@@ -65,12 +65,8 @@ public class Login extends HttpServlet {
         Log.d(TAG, "captcha: " + captchaUser + " captchaAnswer: " + captchaAnswer);
         Log.d(TAG, "OTP: " + otp + " ANSWER: " + optAnswer);
 
-        boolean loginOk = false;
-        if (id == null || (dbm != null && dbm.getQueryWrapper().isLoginOk(id, pw))) {
-            loginOk = true;
-        }
-
-        if (loginOk && captchaAnswer.equals(captchaUser)
+        if (dbm != null && dbm.getQueryWrapper().isLoginOk(id, pw)
+                && captchaAnswer.equals(captchaUser)
                 && (useOtp == false || (otp != null && Integer.parseInt(otp) == optAnswer))) {
             Log.d(TAG, "Athorized user " + captchaAnswer);
 
@@ -104,7 +100,7 @@ public class Login extends HttpServlet {
                                 .getAttribute(WebSession.SESSION_LOGIN_FAILED_COUNT)).intValue();
                     }
 
-                    if (!loginOk) {
+                    if (id != null && pw != null && captchaUser != null) {
                         failCount++;
                     }
                     if (failCount >= MAX_FAIL) {
