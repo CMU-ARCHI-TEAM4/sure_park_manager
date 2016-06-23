@@ -197,8 +197,10 @@ public class Login extends HttpServlet {
         html += "<td><input type='password' name='passwd' id='passwd' maxlength='20' /></td></tr>";
         if (title.contains("Administrator")) {
             html += "</tr><tr><td align='center'>OTP TOKEN</td>";
-            html += "<td><input type='text' name='otp' id='otp' maxlength='9' ";
+             html += "<td><input type='text' name='otp' id='otp' maxlength='9' ";
             html += "onkeypress='return event.charCode >= 48 && event.charCode <= 57'/></td>";
+            html += "<td><a href='javascript:sendSMS();'><input type='button' value='OTP'/></a></td>";
+
         }
         html += "<tr><td><img alt='lg twins' src='" + captcha + "' /></td>";
         html += "<td><input type='text' name='captcha' id='captcha' /></tr>";
