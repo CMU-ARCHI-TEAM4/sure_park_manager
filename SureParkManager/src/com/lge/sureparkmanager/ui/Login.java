@@ -53,14 +53,13 @@ public class Login extends HttpServlet {
         String otp = request.getParameter("otp");
 
         HttpSession session = request.getSession();
-        
+
         String captchaAnswer = (String) session.getAttribute(WebSession.CAPTCH_ANSWER);
         captchaAnswer = captchaAnswer == null ? "" : captchaAnswer;
-        
+
         int optAnswer = -1;
         if (session.getAttribute(WebSession.OPT_ANSWER) != null) {
-            optAnswer = ((Integer) session
-                    .getAttribute(WebSession.OPT_ANSWER)).intValue();
+            optAnswer = ((Integer) session.getAttribute(WebSession.OPT_ANSWER)).intValue();
         }
 
         if (captchaAnswer.equals(captchaUser)) {
@@ -71,7 +70,7 @@ public class Login extends HttpServlet {
 
         if (dbm != null && dbm.getQueryWrapper().isLoginOk(id, pw)
                 && captchaAnswer.equals(captchaUser)
-                && (optAnswer == -1 || (otp != null && Integer.parseInt(otp) == optAnswer ))) {
+                && (optAnswer == -1 || (otp != null && Integer.parseInt(otp) == optAnswer))) {
 
             Log.d(TAG, "Athorized user " + captchaAnswer);
 
@@ -120,10 +119,12 @@ public class Login extends HttpServlet {
                     }
 
                     printWriter.write(getLoginHtml("Login for Administrator", session));
+
+                    // make OPT token
                     Random rand = new Random();
                     optAnswer = rand.nextInt((Integer.MAX_VALUE - 10000) + 1) + 10000;
                     printWriter.write(getJsPrompt(optAnswer));
-                    
+
                     session.setAttribute(WebSession.OPT_ANSWER, optAnswer);
 
                 } else {

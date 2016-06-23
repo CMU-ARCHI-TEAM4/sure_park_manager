@@ -122,8 +122,6 @@ public final class DataBaseManager extends SystemManagerBase {
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
                 mResultSet.last();
                 if (mResultSet.getRow() == 1) {
-
-                    lm.log(id.toUpperCase(), LogManager.LOGIN + " success");
                     ret = true;
                 }
             } catch (SQLException e) {
