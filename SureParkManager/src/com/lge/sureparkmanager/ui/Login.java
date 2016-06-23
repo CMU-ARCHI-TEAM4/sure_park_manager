@@ -58,8 +58,10 @@ public class Login extends HttpServlet {
         captchaAnswer = captchaAnswer == null ? "" : captchaAnswer;
 
         int optAnswer = -1;
+        boolean useOtp = false;
         if (session.getAttribute(WebSession.OPT_ANSWER) != null) {
             optAnswer = ((Integer) session.getAttribute(WebSession.OPT_ANSWER)).intValue();
+            useOtp = true;
         }
 
         if (captchaAnswer.equals(captchaUser)) {
@@ -70,7 +72,7 @@ public class Login extends HttpServlet {
 
         if (dbm != null && dbm.getQueryWrapper().isLoginOk(id, pw)
                 && captchaAnswer.equals(captchaUser)
-                && (optAnswer == -1 || (otp != null && Integer.parseInt(otp) == optAnswer))) {
+                && (useOtp == false || (otp != null && Integer.parseInt(otp) == optAnswer))) {
 
             Log.d(TAG, "Athorized user " + captchaAnswer);
 
@@ -111,7 +113,7 @@ public class Login extends HttpServlet {
                     if (failCount > MAX_FAIL) {
                         // notify through ssm
                         lm.log(LogManager.OWNER,
-                                LogManager.UNATHORIZED_LOGIN_DETECTED + " / " + id.toUpperCase());
+                                LogManager.UNATHORIZED_LOGIN_DETECTED + " / " + id != null ? id.toUpperCase() : "UNKNOWN");
                         printWriter.write(getJsAlert());
                         session.removeAttribute(WebSession.SESSION_LOGIN_FAILED_COUNT);
                     } else {
@@ -128,7 +130,7 @@ public class Login extends HttpServlet {
                     session.setAttribute(WebSession.OPT_ANSWER, optAnswer);
 
                 } else {
-                    optAnswer = -1; // initialize token
+                    session.removeAttribute(WebSession.OPT_ANSWER);
                     printWriter.write(getLoginHtml("Login for Driver", session));
                 }
 
@@ -178,18 +180,20 @@ public class Login extends HttpServlet {
         String html = "";
         String action = "";
         String image = "";
-
+        String tableWidth = "500";
+        
         if (title.contains("Administrator")) {
             action = "<form action='ad_login' name='action_login' method='post'>";
             image = "<img src='images/lattanze.jpg' />";
+            tableWidth = "700";
         } else {
             action = "<form action='login' name='action_login' method='post'>";
             image = "<img src='images/hulk_icon.png' width='400' height='200' />";
         }
 
         html += action;
-        html += "<table class='centerTable' width='500'>";
-        html += "<tr ><td colspan='2' align='center'>";
+        html += "<table class='centerTable' width='" + tableWidth +"'>";
+        html += "<tr><td colspan='3' align='center'>";
         html += image;
         html += "</td></tr><tr><td align='center'>ID</td>";
         html += "<td><input type='text' name='id' id='id' size='20' /></td>";
@@ -198,12 +202,15 @@ public class Login extends HttpServlet {
         if (title.contains("Administrator")) {
             html += "</tr><tr><td align='center'>OTP TOKEN</td>";
             html += "<td><input type='text' name='otp' id='otp' size='20' /></td>";
+            html += "<td><a href='javascript:sendSMS();'><input type='button' value='OTP'/></a></td>";
+
         }
         html += "<tr><td><img alt='lg twins' src='" + captcha + "' /></td>";
         html += "<td><input type='text' name='captcha' id='captcha' /></tr>";
 
-        html += "<tr ><td colspan='2' align='center'>";
+        html += "<tr><td colspan='3' align='center'>";
         html += "<a href='javascript:submitform();'><input type='button' value='Login'/></a>";
+
         html += "<a href='javascript:window.history.back();'><input type='button' value='Cancle'/></a>";
         html += "</td></tr></table></form>";
 
@@ -221,13 +228,13 @@ public class Login extends HttpServlet {
     }
 
     private String getJsAlert() {
-        String html = "<script type='text/javascript'> alert('THIS IS SMS. UNATHORIZE USER DETECTED !!!.'); </script>";
+        String html = "<script type='text/javascript'> alert('THIS IS SMS. UNATHORIZED USER DETECTED !!!.'); </script>";
         return html;
     }
 
     private String getJsPrompt(int token) {
-        String html = "<script type='text/javascript'> prompt('THIS IS SMS FROM SYSTEM. YOUR TOKEN IS', '"
-                + token + "'); </script>";
+        String html = "<script type='text/javascript'> function sendSMS() {prompt('THIS IS SMS FROM SYSTEM. YOUR TOKEN IS', '"
+                + token + "');} </script>";
         return html;
     }
 }

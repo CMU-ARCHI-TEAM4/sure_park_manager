@@ -88,6 +88,7 @@ public final class DataBaseManager extends SystemManagerBase {
                 .getManager(SystemManager.LOG_MANAGER);
 
         final String sqlCommit = "SET autocommit = 1";
+        final String sqlUpdate = "SET SQL_SAFE_UPDATES = 0";
 
         private QueryWrapper() {
 
@@ -95,7 +96,7 @@ public final class DataBaseManager extends SystemManagerBase {
 
         private String getConfiguration(String where) {
             String ret = null;
-            final String sql = "SELECT value FROM tb_configuration name='" + where + "'";
+            final String sql = "SELECT value FROM tb_configuration WHERE name='" + where + "'";
             try {
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sql);
                 while (mResultSet.next()) {
@@ -951,11 +952,13 @@ public final class DataBaseManager extends SystemManagerBase {
 
                 mDataBaseConnectionManager.getStatement().executeUpdate(sql);
 
-                // delete reservation information from reservation table
-                final String sqlDelete = "DELETE FROM tb_reservation WHERE " + "confirm_id='"
-                        + confirmID + "'";
+                // 12:17:50 DELETE FROM tb_reservation WHERE confirm_id='20160623115933HXU1X8'  Error Code: 1175. You are using safe update mode and you tried to update a table without a WHERE that uses a KEY column To disable safe mode, toggle the option in Preferences -> SQL Editor and reconnect. 0.031 sec
 
-                mDataBaseConnectionManager.getStatement().executeUpdate(sqlCommit);
+                // delete reservation information from reservation table
+                final String sqlDelete = "DELETE FROM tb_reservation WHERE confirm_id='" + confirmID
+                        + "'";
+
+                mDataBaseConnectionManager.getStatement().executeUpdate(sqlUpdate);
                 mDataBaseConnectionManager.getStatement().executeUpdate(sqlDelete);
 
                 lm.log(LogManager.DRIVER,
@@ -997,13 +1000,11 @@ public final class DataBaseManager extends SystemManagerBase {
 
             Log.d(TAG, "Grace period " + strGrace);
 
-            final String sql_set = "SET SQL_SAFE_UPDATES = 0";
             final String sql_delete = "DELETE FROM tb_reservation WHERE start_time < '" + strGrace
                     + "' AND confirm_id NOT IN (SELECT f.confirm_id FROM tb_history f) ";
 
             try {
-                mDataBaseConnectionManager.getStatement().executeUpdate(sqlCommit);
-                mDataBaseConnectionManager.getStatement().executeUpdate(sql_set);
+                mDataBaseConnectionManager.getStatement().executeUpdate(sqlUpdate);
                 int count = mDataBaseConnectionManager.getStatement().executeUpdate(sql_delete);
 
                 if (count != 0) {
