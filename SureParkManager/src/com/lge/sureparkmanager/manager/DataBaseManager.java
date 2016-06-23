@@ -651,6 +651,7 @@ public final class DataBaseManager extends SystemManagerBase {
             ResultSet resevedLotResult = null;
             ResultSet mResultSet3 = null;
             ResultSet mResultSet2 = null;
+            ResultSet mResultSet = null;
             try {
 
                 mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlUser);
@@ -670,23 +671,25 @@ public final class DataBaseManager extends SystemManagerBase {
                 final String sqlTime = "SELECT tb_parkinglot_idx FROM tb_reservation WHERE (start_time <= '"
                         + startTime + "' AND end_time > '" + startTime + "' ) OR (start_time < '"
                         + endTime + "'  AND end_time >= '" + endTime + "')";
+//                final String sqlTime = "SELECT tb_parkinglot_idx FROM tb_reservation WHERE (start_time > '"
+//                        + endTime + "' AND end_time < '" + startTime + "' )";
 
                 Log.d(TAG, "sql for reserved lots : " + sqlTime);
 
-                mResultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlTime);
-                final int reservedTotalLot = mResultSet.getFetchSize();
+                ResultSet resultSet = mDataBaseConnectionManager.getStatement().executeQuery(sqlTime);
+                final int reservedTotalLot = resultSet.getFetchSize();
                 Log.d(TAG, "reserved lots number : " + reservedTotalLot);
 
                 // check the number of lots
-                if (reservedTotalLot > totalLot) {
+                if (reservedTotalLot >= totalLot) {
                     Log.d(TAG, "out of lots");
                     return null;
                 }
 
                 int[] lots = new int[totalLot + 1]; // from 1 to totalLot
                 ArrayList<String> parkinglotIdxList = new ArrayList<String>();
-                while (mResultSet.next()) {
-                    parkinglotIdxList.add(mResultSet.getString("tb_parkinglot_idx"));
+                while (resultSet.next()) {
+                    parkinglotIdxList.add(resultSet.getString("tb_parkinglot_idx"));
                 }
 
                 Iterator<String> it = parkinglotIdxList.iterator();
@@ -720,7 +723,7 @@ public final class DataBaseManager extends SystemManagerBase {
 
                 for (int j = 1; j <= totalLot; j++) {
                     if (lots[j] == 0) {
-                        Log.d(TAG, "find out empty lot " + lots[j]);
+                        Log.d(TAG, "find out empty lot " + j);
                         _empty_lot = j;
                         break;
                     }
@@ -932,7 +935,7 @@ public final class DataBaseManager extends SystemManagerBase {
 
             Calendar c = Calendar.getInstance();
             c.setTime(date);
-            c.add(Calendar.MINUTE, gracePeriod);
+            c.add(Calendar.MINUTE, -1 * gracePeriod);
             Date grace = c.getTime();
 
             final String strGrace = dateFormat.format(grace);
