@@ -52,7 +52,7 @@ public final class ChargeManager extends SystemManagerBase {
 			Date endDate = format.parse(endDateTime);
 
 			long period = endDate.getTime() - startDate.getTime();
-			if (period <= 0) {
+			if (period < 0) {
 				// ERROR, start time is bigger than end time
 				Log.e(TAG, "Error!! end time is bigger than start time");
 				return 0;

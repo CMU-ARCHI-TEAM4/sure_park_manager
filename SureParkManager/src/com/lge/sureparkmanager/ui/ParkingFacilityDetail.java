@@ -5,7 +5,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,7 +15,6 @@ import com.lge.sureparkmanager.utils.Html;
 import com.lge.sureparkmanager.utils.Log;
 import com.lge.sureparkmanager.utils.WebSession;
 
-@WebServlet(description = "ParkingFacilityDetail", urlPatterns = { "/pfd" })
 public class ParkingFacilityDetail extends HttpServlet {
     private static final String TAG = ParkingFacilityDetail.class.getSimpleName();
     private static final long serialVersionUID = 1L;
@@ -80,22 +78,22 @@ public class ParkingFacilityDetail extends HttpServlet {
         html += "<form action='ccf' name='ccf' method='post'>";
         html += "<input type='hidden' name='pf_h' value='" + mParkingFacilityName +
                 "^" + mParkingLotNum + "^" + mMacAddr + "'/></form>";
-        html += "<table class='centerTable' width='500'><tr>";
-        html += "<td rowspan='3' align='center'>";
-        html += "<a href='pf'><img src='images/pf_dave.png' width='30%' height='30%' /></a>";
-        html += "</td><td width='200' id='alive'>Device:";
+        html += "<table class='centerTable' width='800' style='font-size:30px;'><tr>";
+        html += "<td rowspan='4' align='center'>";
+        html += "<a href='pf'><img src='images/pf_dave.png' width='40%' height='55%' /></a>";
+        html += "</td><td width='350' id='alive'>Device:";
         html += "</td></tr><tr><td id='entry_gate'>Entry Gate:";
         html += "</td></tr><tr><td id='exit_gate'>Exit Gate:";
-        html += "</td></tr><!--tr><td id='exit_gate'>Confirm: ";
-        html += "<a href='javascript:document.ccf.submit();'>CHECK</a>";
-        html += "</td></tr--></table>";
+        html += "</td></tr><tr><td>Grace period <font color='#33ffff'>&block;&#x02588;&#9608;</font>";
+        html += "</td></tr></table>";
 
-        html += "<table class=\"parking_facility_detail_table\" border=\"1\">";
+        html += "</br>";
+        html += "<table class='parking_facility_detail_table' border='1' width='800' style='font-size:30px;'>";
         if (mParkingLotNum == parkingLotInfos.size()) {
             for (int i = 0; i < parkingLotInfos.size(); i++) {
                 final String[] split = parkingLotInfos.get(i).split("\\^");
                 final String lotName = split[1];
-                html += (i % 5 == 0) ? "<tr>" : "";
+                html += (i % 5 == 0) ? "<tr height='300'>" : "";
                 html += "<td id='" + lotName + "'>" + lotName + "</td>";
                 html += (i > 0 && i % 5 == 4) ? "</tr>" : "";
             }
@@ -134,8 +132,8 @@ public class ParkingFacilityDetail extends HttpServlet {
         html += "var h;";
         html += "if (isArrivedEntryGate == 1) { if (confirm('Car Arrived!!!')) { document.ccf.submit(); } }";
         html += "if (alive == 1) {";
-        html += "h = \"Device: <font color='yellow'>OK</font>\"";
-        html += "} else {h = \"Device: <font color='red'>DEAD</font>\";}";
+        html += "h = \"Device: <font color='yellow'>alive</font>\"";
+        html += "} else {h = \"Device: <font color='red'>dead</font>\";}";
         html += "document.getElementById(\"alive\").innerHTML = h;";
         html += "if (entry_gate == 1) {";
         html += "h = \"Entry Gate:<font color='red'>close</font>\";";

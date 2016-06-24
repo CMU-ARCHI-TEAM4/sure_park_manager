@@ -8,7 +8,6 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,7 +23,6 @@ import com.lge.sureparkmanager.utils.WebSession;
 import nl.captcha.Captcha;
 import nl.captcha.backgrounds.GradiatedBackgroundProducer;
 
-@WebServlet(description = "login", urlPatterns = { "/ad_login", "/login" })
 public class Login extends HttpServlet {
     private static final String TAG = Login.class.getSimpleName();
     private static final long serialVersionUID = 1L;
